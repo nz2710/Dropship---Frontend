@@ -2,9 +2,8 @@ import GoogleMapPage from "../pages/googlemap";
 import OrderPage from "../pages/order";
 import PartnerPage from "../pages/partner";
 import LoginPage from "../pages/login";
-import ShippingAddressPage from "../pages/shippingaddress";
 import Settings from "../pages/setting";
-import Vehicle from "../pages/vehicle";
+import Product from "../pages/product";
 import Depot from "../pages/depot";
 import Customer from "../pages/customer";
 import Dashboard from "../pages/dashboard";
@@ -16,8 +15,7 @@ const publicRoutes = [
     { path: '/googlemap', component: GoogleMapPage },
     { path: '/order', component: OrderPage },
     { path: '/partner', component: PartnerPage },
-    { path: '/shippingaddress', component: ShippingAddressPage },
-    { path: '/vehicle', component: Vehicle },
+    { path: '/product', component: Product },
     { path: '/customer', component: Customer},
     { path: '/user' , component: User},    
     { path: '/' , component: LoginPage, layout: null},     

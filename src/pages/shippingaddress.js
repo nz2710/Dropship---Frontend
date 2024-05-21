@@ -57,7 +57,7 @@ function ShippingAddressPage() {
                 <table className="min-w-full">
                     <thead>
                     <tr>
-                    <th className="border px-4 py-2">STT</th>
+                    <th className="border px-4 py-2">ID</th>
                     <th className="border px-4 py-2">Mã đơn hàng</th>
                     <th className="border px-4 py-2">Tên khách hàng</th>
                     <th className="border px-4 py-2">Giá trị</th>

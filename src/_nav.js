@@ -2,34 +2,47 @@ import React from 'react'
 import CIcon from '@coreui/icons-react'
 import {
   cilBoatAlt,
-  cilMap,
+  // cilMap,
   cilSettings,
   cilClipboard,
-  cilContact,
+  // cilContact,
   cilPeople,
   cilCarAlt,
-  cilGift,
+  // cilGift,
+  // cilPeoplePlus,
   cilHome
 } from '@coreui/icons'
-import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
+import {  CNavItem } from '@coreui/react'
 
 const _nav = [
   {
     component: CNavItem,
-    name: 'Báo cáo',
+    name: 'Dashboard',
     to: '/dashboard',
     icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />
   },
   {
     component: CNavItem,
-    name: 'Đối tác',
+    name: 'Depot',
+    to: '/depot',
+    icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Partner',
     to: '/partner',
     icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
-    name: 'Đơn hàng',
-    to: '/shippingaddress',
+    name: 'Product',
+    to: '/product',
+    icon: <CIcon icon={cilCarAlt} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Order',
+    to: '/order',
     icon: <CIcon icon={cilBoatAlt} customClassName="nav-icon" />,
   },
   // {
@@ -38,39 +51,29 @@ const _nav = [
   //   to: '/googlemap',
   //   icon: <CIcon icon={cilGift} customClassName="nav-icon" />,
   // },
-  {
-    component: CNavItem,
-    name: 'Phương tiện',
-    to: '/vehicle',
-    icon: <CIcon icon={cilCarAlt} customClassName="nav-icon" />,
-  },
+
   // {
   //   component: CNavItem,
   //   name: 'khách hàng',
   //   to: '/googlemap',
   //   icon: <CIcon icon={cilContact} customClassName="nav-icon" />,
   // },
+
   {
     component: CNavItem,
-    name: 'Kho',
-    to: '/depot',
-    icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Tối ưu',
+    name: 'Routing',
     to: '/settings',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
+  // {
+  //   component: CNavItem,
+  //   name: 'Googlemap',
+  //   to: '/googlemap',
+  //   icon: <CIcon icon={cilMap} customClassName="nav-icon" />,
+  // },
   {
     component: CNavItem,
-    name: 'Googlemap',
-    to: '/googlemap',
-    icon: <CIcon icon={cilMap} customClassName="nav-icon" />,
-  },
-  {
-    component: CNavItem,
-    name: 'Add User',
+    name: 'User',
     to: '/user',
     icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
   }

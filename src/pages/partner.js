@@ -1,325 +1,381 @@
 import { useState, useEffect } from "react";
 import ReactPaginate from "react-paginate";
-import { API_URL } from '../utils/constant';
-import { useCookies } from 'react-cookie';
+import { API_URL2 } from "../utils/constant";
+import { useCookies } from "react-cookie";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import AddPartnerForm from "../components/partner/AddPartnerForm";
+import PartnerDetailForm from "../components/partner/PartnerDetailForm";
 
 function PartnerPage() {
-    const [searchName, setSearchName] = useState("");
-    const [searchDate, setSearchDate] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [currentPageData, setCurrentPageData] = useState([]);
-    const [pageCount, setPageCount] = useState(0);
-    const [showForm, setShowForm] = useState(false);
-    const [form, setForm] = useState({
-        name: '',
-        address: '',
-        phone: '',
+  const [orderBy, setOrderBy] = useState("id");
+  const [sortBy, setSortBy] = useState("asc");
+  const [searchType, setSearchType] = useState("name");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPageData, setCurrentPageData] = useState([]);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
+  const [currentOrderPage, setCurrentOrderPage] = useState(1);
+  const [orderPageCount, setOrderPageCount] = useState(0);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState(null);
+  const [selectedPartnerOrders, setSelectedPartnerOrders] = useState(null);
+  const [showDetailForm, setShowDetailForm] = useState(false);
+  const dataPerPage = 10;
+  const [cookies] = useCookies(["token"]);
+
+  const handlePageChange = ({ selected: selectedPage }) => {
+    setCurrentPage(selectedPage + 1);
+    handleLoadData(selectedPage + 1);
+  };
+
+  const handleDelete = async (item) => {
+    try {
+      const response = await fetch(`${API_URL2}/admin/partner/${item.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      });
+      if (response.status === 200) {
+        toast.success("Item successfully deleted.");
+        handleLoadData(currentPage);
+      } else {
+        throw new Error("Failed to delete item");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleLoadData = async (page = currentPage) => {
+    const url = new URL(`${API_URL2}/admin/partner`);
+    url.searchParams.append("pageSize", dataPerPage);
+    url.searchParams.append("order_by", orderBy);
+    url.searchParams.append("sort_by", sortBy);
+    url.searchParams.append("page", page);
+
+    if (searchType === "name") {
+      url.searchParams.append("name", searchTerm);
+    } else if (searchType === "address") {
+      url.searchParams.append("address", searchTerm);
+    } else if (searchType === "phone") {
+      url.searchParams.append("phone", searchTerm);
+    }
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: "Bearer " + cookies.token,
+      },
     });
-    const dataPerPage = 5;
-    const [cookies] = useCookies(["token"]);
-
-    const handlePageChange = ({ selected: selectedPage }) => {
-        setCurrentPage(selectedPage);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!form.name || !form.address || !form.phone) {
-          alert('Vui lòng điền đầy đủ thông tin.');
-          return;
-        }
-
-        if(form.id){
-            const response = await fetch(`${API_URL}/admin/partner/${form.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + cookies.token,
-                },
-                body: JSON.stringify(form),
-            });
-    
-            if (response.status === 200) {
-                alert('Cập nhật thành công');
-                setShowForm(false);
-                handleLoadData();
-            } else {
-                alert('Cập nhật thất bại');
-            }
-        } else {
-            const response = await fetch(`${API_URL}/admin/partner`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + cookies.token,
-                },
-                body: JSON.stringify(form),
-            });
-    
-            if (response.status === 200) {
-                alert('Đăng ký thành công');
-                setShowForm(false);
-                handleLoadData();
-            } else {
-                alert('Đăng ký thất bại');
-            }
-        }
-    };
-
-    const handleFormChange = (e) => {
-        const { name, value } = e.target;
-        setForm((prevForm) => ({
-          ...prevForm,
-          [name]: value,
-        }));
-    };
-
-    const handleUpdate = (item) => () => {
-        setForm(item);
-        setShowForm(true);
+    if (response.status === 200) {
+      const body = (await response.json()).data;
+      setCurrentPageData(body.data);
+      setPageCount(body.last_page);
+      if (body.data.length === 0 && page > 1) {
+        setCurrentPage(page - 1);
+      } else {
+        setCurrentPage(page);
+      }
+    } else {
+      console.log("Fail", response);
     }
+  };
 
-    const handleAdd = () => {
-        setForm({
-            name: '',
-            address: '',
-            phone: '',
-        });
-        setShowForm(true);
-    }
+  const handleAddPartner = () => {
+    setShowAddForm(true);
+  };
 
-    const handleRemove = async (item) => {
-        const response = await fetch(`${API_URL}/admin/partner/${item.id}`, {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              'Accept': 'application/json',
-              'Authorization': 'Bearer ' + cookies.token,
-            }
-        });
-        if (response.status === 200) {
-            alert('Xóa thành công');
-            handleLoadData();
-        } else {
-            alert('Xóa thất bại');
+  const handleCloseAddForm = () => {
+    setShowAddForm(false);
+  };
+
+  const handlePartnerAdded = () => {
+    handleLoadData(currentPage);
+  };
+
+  const handleShowDetail = async (item) => {
+    try {
+      const response = await fetch(
+        `${API_URL2}/admin/partner/${item.id}?page=1&pageSize=5`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
         }
-    }
+      );
 
-    const handleLoadData = async () => {
-        const response = await fetch(`${API_URL}/admin/partner?per_page=${dataPerPage}&page=${currentPage}&name=${searchName}&date=${searchDate}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              'Accept': 'application/json',
-              'Authorization': 'Bearer ' + cookies.token,
-            }
-        });
-        if (response.status === 200) {
-            const body = (await response.json()).data;
-            setCurrentPageData(body.data);
-            setPageCount(body.last_page);
-        } else {
-            console.log("Fail", response);
+      if (response.status === 200) {
+        const data = await response.json();
+        setSelectedPartner(data.data.partner);
+        setSelectedPartnerOrders(data.data.orders);
+        setCurrentOrderPage(data.current_page);
+        setOrderPageCount(data.last_page);
+        setShowDetailForm(true);
+      } else {
+        throw new Error("Failed to fetch partner details");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleOrderPageChange = async (selectedPage) => {
+    const currentPage = selectedPage.selected + 1;
+    try {
+      const response = await fetch(
+        `${API_URL2}/admin/partner/${selectedPartner.id}?page=${currentPage}&pageSize=5`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
         }
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setSelectedPartnerOrders(data.data.orders);
+        setCurrentOrderPage(data.current_page);
+      } else {
+        throw new Error("Failed to fetch partner orders");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
     }
+  };
 
-    useEffect(() => {
-        handleLoadData();
-    }, [searchName, searchDate, currentPage]);
+  const handleCloseDetailForm = () => {
+    setSelectedPartner(null);
+    setShowDetailForm(false);
+  };
 
-    return (
-        <div className="flex justify-center bg-white mx-6 p-4 h-3/4">
-            <div>
-                <div className="mb-4 flex">
-                    <div className="flex-1">
-                        <input
-                        type="text"
-                        placeholder="Search by name"
-                        value={searchName}
-                        onChange={(e) => setSearchName(e.target.value)}
-                        className="border border-gray-300 p-2 rounded-md mr-2"
-                        />
-                        <input
-                        type="text"
-                        placeholder="Search by date"
-                        value={searchDate}
-                        onChange={(e) => setSearchDate(e.target.value)}
-                        className="border border-gray-300 p-2 rounded-md"
-                        />
-                    </div>
-                    <div>
-                        <button 
-                            className="bg-slate-400 border-slate-600 border-2 border-solid text-white py-2 px-4 rounded-md"
-                            onClick={handleAdd}
-                        >   
-                            Add
-                        </button>   
-                    </div>
-                </div>
-                <table className="min-w-full">
-                    <thead>
-                    <tr>
-                    <th className="border px-4 py-2">STT</th>
-                    <th className="border px-4 py-2">Tên</th>
-                    {/* <th className="border px-4 py-2">Ngày đăng ký</th> */}
-                    <th className="border px-4 py-2">Địa chỉ</th>
-                    <th className="border px-4 py-2">Số điện thoại</th>
-                    <th className="border px-4 py-2">Số lượng đơn hàng</th>
-                    {/* <th className="border px-4 py-2">Chiết khấu</th> */}
-                    <th className="border px-4 py-2">Doanh thu</th>
-                    <th className="border px-4 py-2">Hoa hồng</th>
-                    <th className="border px-4 py-2">Trạng thái</th>
-                    <th className="border px-4 py-2">Thao tác</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {currentPageData.map((item) => (
-                        <tr key={item.id}>
-                        <td className="border px-4 py-2">{item.id}</td>
-                        <td className="border px-4 py-2">{item.name}</td>
-                        {/* <td className="border px-4 py-2">{item.register_date}</td> */}
-                        <td className="border px-4 py-2">{item.address}</td>
-                        <td className="border px-4 py-2">{item.phone}</td>
-                        <td className="border px-4 py-2">{item.number_of_order}</td>
-                        {/* <td className="border px-4 py-2">{item.discount}</td> */}
-                        <td className="border px-4 py-2">{item.revenue}</td>
-                        <td className="border px-4 py-2">{item.commission}</td>
-                        <td className="border px-4 py-2">{item.status}</td>
-                        <td className="border px-4 py-2">
-                            <div className="flex gap-4">
-                                <p className="text-yellow-500" onClick={handleUpdate(item)}>Edit</p>
-                                <p className="text-red-600" onClick={() => handleRemove(item)}>Delete</p>
-                            </div>
-                        </td>
-                      </tr>
-                    ))}
-                    </tbody>
-                </table>
-                <ReactPaginate
-                    previousLabel={"Previous"}
-                    nextLabel={"Next"}
-                    pageCount={pageCount}
-                    onPageChange={handlePageChange}
-                    containerClassName={"pagination"}
-                    previousLinkClassName={"pagination__link"}
-                    nextLinkClassName={"pagination__link"}
-                    disabledClassName={"pagination__link--disabled"}
-                    activeClassName={"pagination__link--active"}
+  const handlePartnerUpdated = async (updatedPartner) => {
+    try {
+      setSelectedPartner(updatedPartner);
+      const response = await fetch(
+        `${API_URL2}/admin/partner/${updatedPartner.id}?page=${currentOrderPage}&pageSize=5`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        const data = await response.json();
+        setSelectedPartnerOrders(data.data.orders);
+        setOrderPageCount(data.last_page);
+        handleLoadData(currentPage); // Tải lại dữ liệu partner cho bảng danh sách
+      } else {
+        throw new Error("Failed to fetch updated partner orders");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleSort = (column) => {
+    if (orderBy === column) {
+      setSortBy(sortBy === "asc" ? "desc" : "asc");
+    } else {
+      setOrderBy(column);
+      setSortBy("asc");
+    }
+  };
+  const getSortIcon = (column) => {
+    if (orderBy === column) {
+      return sortBy === "asc" ? "sort-asc" : "sort-desc";
+    }
+    return "";
+  };
+
+  useEffect(() => {
+    handleLoadData();
+  }, [currentPage, searchType, searchTerm, orderBy, sortBy]);
+
+  return (
+    <div className="flex justify-center bg-white p-3 m-3 rounded-md">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
+      <div className="w-full">
+        {!showAddForm && !showDetailForm ? (
+          <>
+            <div className="mb-4 flex justify-between">
+              <div className="flex-grow flex items-center">
+                <select
+                  value={searchType}
+                  onChange={(e) => setSearchType(e.target.value)}
+                  className="border border-gray-300 p-2 rounded-md mr-2"
+                >
+                  <option value="name">Name</option>
+                  <option value="address">Address</option>
+                  <option value="phone">Phone</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder={`Search by ${
+                    searchType === "name"
+                      ? "Name"
+                      : searchType === "address"
+                      ? "Address"
+                      : "Phone"
+                  }`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border border-gray-300 p-2 rounded-md"
                 />
+              </div>
+              <div>
+                <button
+                  onClick={handleAddPartner}
+                  className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Add
+                </button>
+              </div>
+              {/* ... */}
             </div>
-            {showForm && (
-                <div className="fixed bg-slate-400 top-0" style={{ width: '100vw', height: '100vh' }}>
-                    <form className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md mt-32">
-                        <h2 className="text-xl font-semibold mb-4">Đăng Ký Đối Tác</h2>
-                        <div className="mb-4">
-                        <label htmlFor="name" className="block text-gray-700 font-medium mb-1">
-                            Tên đối tác
-                        </label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                            value={form.name}
-                            onChange={handleFormChange}
-                        />
-                        </div>
-                        <div className="mb-4">
-                        <label htmlFor="address" className="block text-gray-700 font-medium mb-1">
-                            Địa chỉ
-                        </label>
-                        <input
-                            type="text"
-                            id="address"
-                            name="address"
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                            value={form.address}
-                            onChange={handleFormChange}
-                        />
-                        </div>
-                        <div className="mb-4">
-                        <label htmlFor="phone" className="block text-gray-700 font-medium mb-1">
-                            Số điện thoại
-                        </label>
-                        <input
-                            type="text"
-                            id="phone"
-                            name="phone"
-                            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                            value={form.phone}
-                            onChange={handleFormChange}
-                        />
-                        </div>
-                        {
-                            form.id && (
-                                <div className="mb-4">
-                                    <label htmlFor="register_date" className="block text-gray-700 font-medium mb-1">
-                                        Ngày đăng ký
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="register_date"
-                                        name="register_date"
-                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                                        value={form.register_date}
-                                        onChange={handleFormChange}
-                                    />
-                                </div>
-                            )
-                        }
-                        {
-                            form.id && (
-                                <div className="mb-4">
-                                    <label htmlFor="discount" className="block text-gray-700 font-medium mb-1">
-                                        Chiết khấu
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="discount"
-                                        name="discount"
-                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                                        value={form.discount}
-                                        onChange={handleFormChange}
-                                    />
-                                </div>
-                            )
-                        }
-                        {
-                            form.id && (
-                                <div className="mb-4">
-                                    <label htmlFor="status" className="block text-gray-700 font-medium mb-1">
-                                        Trạng thái
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="status"
-                                        name="status"
-                                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:border-blue-500"
-                                        value={form.status}
-                                        onChange={handleFormChange}
-                                    />
-                                </div>
-                            )
-                        }
+
+            <table className="min-w-full">
+              <thead>
+                <tr>
+                  <th
+                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                      "id"
+                    )}`}
+                    onClick={() => handleSort("id")}
+                  >
+                    ID
+                  </th>
+                  <th
+                    className={`border px-4 py-2 w-1/6 cursor-pointer ${getSortIcon(
+                      "name"
+                    )}`}
+                    onClick={() => handleSort("name")}
+                  >
+                    Name
+                  </th>
+                  {/* <th className="border px-4 py-2">Ngày đăng ký</th> */}
+                  <th
+                    className={`border px-4 py-2 w-1/2 cursor-pointer ${getSortIcon(
+                      "address"
+                    )}`}
+                    onClick={() => handleSort("address")}
+                  >
+                    Address
+                  </th>
+                  <th className="border px-4 py-2 ">Phone</th>
+                  <th className="border px-4 py-2 w-1/8">Quantity</th>
+                  {/* <th className="border px-4 py-2">Chiết khấu</th> */}
+                  <th className="border px-4 py-2">Revenue</th>
+                  <th className="border px-4 py-2">Commission</th>
+                  <th
+                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                      "status"
+                    )}`}
+                    onClick={() => handleSort("status")}
+                  >
+                    Status
+                  </th>
+                  <th className="border px-4 py-2">Operation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentPageData.map((item) => (
+                  <tr key={item.id}>
+                    <td className="border px-4 py-2">{item.id}</td>
+                    <td className="border px-4 py-2">{item.name}</td>
+                    {/* <td className="border px-4 py-2">{item.register_date}</td> */}
+                    <td className="border px-4 py-2">{item.address}</td>
+                    <td className="border px-4 py-2">{item.phone}</td>
+                    <td className="border px-4 py-2">{item.number_of_order}</td>
+                    {/* <td className="border px-4 py-2">{item.discount}</td> */}
+                    <td className="border px-4 py-2">{item.revenue}</td>
+                    <td className="border px-4 py-2">{item.commission}</td>
+                    <td className="border px-4 py-2">
+                      {item.status === "1" ? (
+                        <span className="text-green-500">Active</span>
+                      ) : (
+                        <span className="text-red-500">Inactive</span>
+                      )}
+                    </td>
+                    <td className="border px-4 py-2">
+                      <div className="flex gap-2">
                         <button
-                        type="submit"
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md mb-4"
-                        onClick={handleSubmit}
+                          onClick={() => handleShowDetail(item)}
+                          className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
                         >
-                            {form.id ? 'Cập nhật' : 'Đăng ký'}
+                          Detail
                         </button>
                         <button
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-md"
-                        onClick={() => setShowForm(false)}
+                          onClick={() => handleDelete(item)}
+                          className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-800"
                         >
-                        Huỷ
+                          Delete
                         </button>
-                    </form>
-                </div>
-            )}
-        </div>
-    )
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <ReactPaginate
+              previousLabel={"Previous"}
+              nextLabel={"Next"}
+              pageCount={pageCount}
+              onPageChange={handlePageChange}
+              containerClassName={"pagination"}
+              previousLinkClassName={"pagination__link"}
+              nextLinkClassName={"pagination__link"}
+              disabledClassName={"pagination__link--disabled"}
+              activeClassName={"pagination__link--active"}
+              forcePage={currentPage - 1}
+            />
+          </>
+        ) : showAddForm ? (
+          <AddPartnerForm
+            onClose={handleCloseAddForm}
+            onPartnerAdded={handlePartnerAdded}
+          />
+        ) : (
+          <PartnerDetailForm
+            partner={selectedPartner}
+            orders={selectedPartnerOrders}
+            currentPage={currentOrderPage}
+            pageCount={orderPageCount}
+            onClose={handleCloseDetailForm}
+            onPartnerUpdated={handlePartnerUpdated}
+            onPageChange={handleOrderPageChange}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 export default PartnerPage;
