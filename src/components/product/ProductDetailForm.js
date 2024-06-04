@@ -35,7 +35,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
         formDataToSend.append("image", selectedImage);
       }
 
-      const response = await fetch(`${API_URL2}/admin/product/${product.id}`, {
+      const response = await fetch(`${API_URL2}/api/admin/product/${product.id}`, {
         method: "POST",
         headers: {
           Accept: "application/json",

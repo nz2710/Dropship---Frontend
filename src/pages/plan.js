@@ -4,23 +4,81 @@ import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AddProductForm from "../components/product/AddProductForm";
-import ProductDetailForm from "../components/product/ProductDetailForm";
+import PlanDetailForm from "../components/plan/PlanDetailForm";
 
-function Product() {
+function Plan() {
   const [orderBy, setOrderBy] = useState("id");
   const [sortBy, setSortBy] = useState("asc");
-  const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPageData, setCurrentPageData] = useState([]);
-  // const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showDetailForm, setShowDetailForm] = useState(false);
   const dataPerPage = 10;
   const [cookies] = useCookies(["token"]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showDetailForm, setShowDetailForm] = useState(false);
+  const [currentRoutePage, setCurrentRoutePage] = useState(1);
+  const [routePageCount, setRoutePageCount] = useState(0);
+  const [selectedPlanRoutes, setSelectedPlanRoutes] = useState(null);
+
+  const handleShowDetail = async (item) => {
+    try {
+      const response = await fetch(
+        `${API_URL2}/api/admin/routing/${item.id}??page=1&pageSize=10`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        const body = await response.json();
+        setSelectedPlan(body.data);
+        setSelectedPlanRoutes(body.data.routes);
+        setCurrentRoutePage(body.current_page);
+        setRoutePageCount(body.last_page);
+        setShowDetailForm(true);
+      } else {
+        throw new Error("Failed to fetch plan details");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleRoutePageChange = async (selectedPage) => {
+    const currentPage = selectedPage.selected + 1;
+    try {
+      const response = await fetch(
+        `${API_URL2}/api/admin/routing/${selectedPlan.id}?page=${currentPage}&pageSize=10`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const body = await response.json();
+        setSelectedPlanRoutes(body.data.routes);
+        setCurrentRoutePage(body.current_page);
+      } else {
+        throw new Error("Failed to fetch partner orders");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+  const handleCloseDetailForm = () => {
+    setSelectedPlan(null);
+    setShowDetailForm(false);
+  };
 
   const handlePageChange = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage + 1);
@@ -28,17 +86,12 @@ function Product() {
   };
 
   const handleLoadData = async (page = currentPage) => {
-    const url = new URL(`${API_URL2}/api/admin/product`);
+    const url = new URL(`${API_URL2}/api/admin/routing`);
     url.searchParams.append("pageSize", dataPerPage);
     url.searchParams.append("order_by", orderBy);
     url.searchParams.append("sort_by", sortBy);
     url.searchParams.append("page", page);
-
-    if (searchType === "name") {
-      url.searchParams.append("name", searchTerm);
-    } else if (searchType === "sku") {
-      url.searchParams.append("sku", searchTerm);
-    }
+    url.searchParams.append("name", searchTerm); // Thêm từ khóa tìm kiếm vào URL
 
     const response = await fetch(url, {
       method: "GET",
@@ -62,22 +115,6 @@ function Product() {
     }
   };
 
-  useEffect(() => {
-    handleLoadData();
-  }, [currentPage, searchType, searchTerm, orderBy, sortBy]);
-
-  const handleAddProduct = () => {
-    setShowAddForm(true);
-  };
-
-  const handleCloseAddForm = () => {
-    setShowAddForm(false);
-  };
-
-  const handleProductAdded = () => {
-    handleLoadData(currentPage);
-  };
-
   const handleSort = (column) => {
     if (orderBy === column) {
       setSortBy(sortBy === "asc" ? "desc" : "asc");
@@ -95,7 +132,7 @@ function Product() {
 
   const handleDelete = async (item) => {
     try {
-      const response = await fetch(`${API_URL2}/api/admin/product/${item.id}`, {
+      const response = await fetch(`${API_URL2}/api/admin/routing/${item.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +141,7 @@ function Product() {
         },
       });
       if (response.status === 200) {
-        toast.success("Product successfully deleted.");
+        toast.success("Item successfully deleted.");
         handleLoadData(currentPage);
       } else {
         throw new Error("Failed to delete item");
@@ -114,58 +151,9 @@ function Product() {
     }
   };
 
-  const handleShowDetail = async (item) => {
-    try {
-      const response = await fetch(`${API_URL2}/api/admin/product/${item.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-
-      if (response.status === 200) {
-        const data = await response.json();
-        setSelectedProduct(data.data);
-        setShowDetailForm(true);
-      } else {
-        throw new Error("Failed to fetch product details");
-      }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
-  };
-
-  const handleCloseDetailForm = () => {
-    setSelectedProduct(null);
-    setShowDetailForm(false);
-  };
-
-  const handleProductUpdated = async (updatedProduct) => {
-    try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/product/${updatedProduct.id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        const data = await response.json();
-        setSelectedProduct(data.data);
-      } else {
-        throw new Error("Failed to fetch updated product details");
-      }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
-  };
+  useEffect(() => {
+    handleLoadData();
+  }, [currentPage, searchTerm, orderBy, sortBy]);
 
   return (
     <div className="flex justify-center bg-white p-3 m-3 rounded-md">
@@ -181,39 +169,16 @@ function Product() {
         pauseOnHover
       />
       <div className="w-full">
-        {!showAddForm && !showDetailForm ? (
+        {!showDetailForm ? (
           <>
-            <div className="mb-4 flex justify-between">
-              <div className="flex-grow flex items-center">
-                <select
-                  value={searchType}
-                  onChange={(e) => setSearchType(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md mr-2"
-                >
-                  <option value="name">Name</option>
-                  <option value="sku">SKU</option>
-                  {/* <option value="phone">Phone</option> */}
-                </select>
-                <input
-                  type="text"
-                  placeholder={`Search by ${
-                    searchType === "name" ? "Name" : "SKU"
-                  }`}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md"
-                />
-              </div>
-              <div>
-                <button
-                  onClick={handleAddProduct}
-                  className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Add
-                </button>
-              </div>
-
-              {/* ... */}
+            <div className="mb-4 flex">
+              <input
+                type="text"
+                placeholder={`Search by name`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="border border-gray-300 p-2 rounded-md"
+              />
             </div>
             <table className="min-w-full">
               <thead>
@@ -227,41 +192,56 @@ function Product() {
                     ID
                   </th>
                   <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                    className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
                       "name"
                     )}`}
                     onClick={() => handleSort("name")}
                   >
                     Name
                   </th>
-                  <th className="border px-4 py-2">SKU</th>
-                  <th className="border px-4 py-2 ">Description</th>
                   <th
                     className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "price"
+                      "total_distance"
                     )}`}
-                    onClick={() => handleSort("price")}
+                    onClick={() => handleSort("total_distance")}
                   >
-                    Price
+                    Total Distance (km)
                   </th>
                   <th
                     className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "cost"
+                      "total_time_serving"
                     )}`}
-                    onClick={() => handleSort("cost")}
+                    onClick={() => handleSort("total_time_serving")}
                   >
-                    Cost
+                    Total Time (minutes)
                   </th>
                   <th
                     className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "quantity"
+                      "total_demand"
                     )}`}
-                    onClick={() => handleSort("quantity")}
+                    onClick={() => handleSort("total_demand")}
                   >
-                    Quantity
+                    Total Demand (kg)
                   </th>
-                  <th className="border px-4 py-2 ">Image</th>
-                  <th className="border px-4 py-2">Status</th>
+                  <th
+                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                      "fee"
+                    )}`}
+                    onClick={() => handleSort("fee")}
+                  >
+                    Fee (VND)
+                  </th>
+                  <th
+                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                      "status"
+                    )}`}
+                    onClick={() => handleSort("status")}
+                  >
+                    Status
+                  </th>
+                  {/* <th className="border px-4 py-2">Kinh độ</th>
+              <th className="border px-4 py-2">Vĩ độ</th>
+              <th className="border px-4 py-2">Thời gian phục vụ</th> */}
                   <th className="border px-4 py-2">Operation</th>
                 </tr>
               </thead>
@@ -270,43 +250,43 @@ function Product() {
                   <tr key={item.id}>
                     <td className="border px-4 py-2">{item.id}</td>
                     <td className="border px-4 py-2">{item.name}</td>
-                    <td className="border px-4 py-2">{item.sku}</td>
-                    <td className="border px-4 py-2">{item.description}</td>
                     <td className="border px-4 py-2">
-                      {" "}
-                      {item.price
-                        ? parseFloat(item.price).toLocaleString("vi-VN", {
+                      {parseFloat(item.total_distance)}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {parseFloat(item.total_time_serving)}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {parseFloat(item.total_demand)}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {item.fee
+                        ? parseFloat(item.fee).toLocaleString("vi-VN", {
                             minimumFractionDigits: 0,
                             maximumFractionDigits: 0,
                           })
                         : ""}
                     </td>
                     <td className="border px-4 py-2">
-                      {" "}
-                      {item.cost
-                        ? parseFloat(item.cost).toLocaleString("vi-VN", {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })
-                        : ""}
-                    </td>
-                    <td className="border px-4 py-2">{item.quantity}</td>
-                    <td className="border px-4 py-2">
-                      <img
-                        src={`${API_URL2}/images/products/${item.image}`}
-                        alt="img"
-                        className="w-15 h-15 object-cover"
-                      />
-                    </td>
-                    <td className="border px-4 py-2">
-                      {item.status === "active" ? (
-                        <span className="text-green-500">Active</span>
+                      {item.status === "success" ? (
+                        <span className="text-green-500">Success</span>
+                      ) : item.status === "delivery" ? (
+                        <span className="text-yellow-500">Delivery</span>
                       ) : (
-                        <span className="text-red-500">Inactive</span>
+                        <span className="text-red-500">Pending</span>
                       )}
                     </td>
-                    <td className="border px-4 py-2">
-                      <div className="flex gap-2">
+                    {/* <td className="border px-4 py-2">{item.col4}</td>
+                <td className="border px-4 py-2">{item.col5}</td>
+                <td className="border px-4 py-2">{item.col6}</td> */}
+                    <td className="border px-2 py-2">
+                      <div className="flex gap-1">
+                        <button
+                          //   onClick={() => handleShowDetail(item)}
+                          className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-800"
+                        >
+                          Confirm
+                        </button>
                         <button
                           onClick={() => handleShowDetail(item)}
                           className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
@@ -338,20 +318,19 @@ function Product() {
               forcePage={currentPage - 1}
             />
           </>
-        ) : showAddForm ? (
-          <AddProductForm
-            onClose={handleCloseAddForm}
-            onProductAdded={handleProductAdded}
-          />
         ) : (
-          <ProductDetailForm
-            product={selectedProduct}
+          <PlanDetailForm
+            plan={selectedPlan}
             onClose={handleCloseDetailForm}
-            onProductUpdated={handleProductUpdated}
+            routes={selectedPlanRoutes}
+            currentPage={currentRoutePage}
+            pageCount={routePageCount}
+            onPageChange={handleRoutePageChange}
+            // onProductUpdated={handleProductUpdated}
           />
         )}
       </div>
     </div>
   );
 }
-export default Product;
+export default Plan;

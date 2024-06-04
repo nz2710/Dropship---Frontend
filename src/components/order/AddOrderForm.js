@@ -2,20 +2,41 @@ import { useState, useEffect } from "react";
 import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import Select from "react-select";
 
 function AddOrderForm({ onClose, onOrderAdded }) {
   const [partners, setPartners] = useState([]);
   const [address, setAddress] = useState("");
   const [partnerId, setPartnerId] = useState("");
   const [customerName, setCustomerName] = useState("");
+  const [phone, setPhone] = useState("");
   const [massOfOrder, setMassOfOrder] = useState(0);
   const [timeService, setTimeService] = useState(0);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const goongApiKey = "VWEykUxNr5f4DReznrCTAtui2DL8iuXXdjapLuJv";
   const [cookies] = useCookies(["token"]);
-  const [searchPartner, setSearchPartner] = useState("");
-const [searchProduct, setSearchProduct] = useState("");
-  
+
+  const handleAddressInput = async (event) => {
+    const input = event.target.value;
+    if (input.length > 2) {
+      const response = await fetch(
+        `https://rsapi.goong.io/Place/AutoComplete?api_key=${goongApiKey}&input=${encodeURIComponent(
+          input
+        )}`
+      );
+      const data = await response.json();
+      setSuggestions(data.predictions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setAddress(suggestion.description);
+    setSuggestions([]);
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -23,7 +44,7 @@ const [searchProduct, setSearchProduct] = useState("");
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`${API_URL2}/admin/product`, {
+      const response = await fetch(`${API_URL2}/api/admin/getProduct`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -31,7 +52,7 @@ const [searchProduct, setSearchProduct] = useState("");
         },
       });
       if (response.status === 200) {
-        const body = (await response.json()).data;
+        const body = await response.json();
         setProducts(body.data);
       } else {
         throw new Error("Failed to fetch products");
@@ -47,7 +68,7 @@ const [searchProduct, setSearchProduct] = useState("");
 
   const fetchPartners = async () => {
     try {
-      const response = await fetch(`${API_URL2}/admin/getAll`, {
+      const response = await fetch(`${API_URL2}/api/admin/getPartner`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -55,7 +76,7 @@ const [searchProduct, setSearchProduct] = useState("");
         },
       });
       if (response.status === 200) {
-        const body = (await response.json());
+        const body = await response.json();
         setPartners(body.data);
       } else {
         throw new Error("Failed to fetch partners");
@@ -65,13 +86,23 @@ const [searchProduct, setSearchProduct] = useState("");
     }
   };
 
-  const filteredPartners = partners.filter((partner) =>
-    `${partner.id} - ${partner.name}`.toLowerCase().includes(searchPartner.toLowerCase())
-  );
-  
-  const filteredProducts = products.filter((product) =>
-    `${product.name} - ${product.sku}`.toLowerCase().includes(searchProduct.toLowerCase())
-  );
+  const partnerOptions = partners.map((partner) => ({
+    value: partner.id,
+    label: `${partner.id} - ${partner.name}`,
+  }));
+
+  const productOptions = products.map((product) => ({
+    value: product.id,
+    label: `${product.name} - ${product.sku}`,
+  }));
+
+  const handlePartnerFilter = (option, inputValue) => {
+    return option.label.toLowerCase().includes(inputValue.toLowerCase());
+  };
+
+  const handleProductFilter = (option, inputValue) => {
+    return option.label.toLowerCase().includes(inputValue.toLowerCase());
+  };
 
   const handleProductSelect = (productId) => {
     const selectedProduct = products.find(
@@ -110,7 +141,7 @@ const [searchProduct, setSearchProduct] = useState("");
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/admin/order`, {
+      const response = await fetch(`${API_URL2}/api/admin/order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,6 +152,7 @@ const [searchProduct, setSearchProduct] = useState("");
           address,
           partner_id: parseInt(partnerId),
           customer_name: customerName,
+          phone,
           mass_of_order: massOfOrder,
           time_service: timeService,
           products: selectedProducts.map(({ id, quantity, price }) => ({
@@ -147,7 +179,7 @@ const [searchProduct, setSearchProduct] = useState("");
       <h2 className="text-xl font-bold mb-4">Add Order</h2>
       <form onSubmit={handleSubmit}>
         {/* Form fields */}
-        <div className="mb-4">
+        <div className="mb-4 relative">
           <label htmlFor="address" className="block mb-1">
             Address
           </label>
@@ -155,39 +187,42 @@ const [searchProduct, setSearchProduct] = useState("");
             type="text"
             id="address"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={(e) => {
+              setAddress(e.target.value);
+              handleAddressInput(e);
+            }}
             className="border border-gray-300 p-2 rounded w-full"
             required
           />
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-48 overflow-y-auto">
+              {suggestions.map((suggestion) => (
+                <li
+                  key={suggestion.place_id}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="px-2 py-1 cursor-pointer hover:bg-gray-100"
+                >
+                  {suggestion.description}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         {/* Partner selection */}
         <div className="mb-4">
-        <label htmlFor="partnerId" className="block mb-1">
-          Partner
-        </label>
-        <input
-          type="text"
-          id="searchPartner"
-          value={searchPartner}
-          onChange={(e) => setSearchPartner(e.target.value)}
-          className="border border-gray-300 p-2 rounded w-full mb-2"
-          placeholder="Search partner"
-        />
-        <select
-          id="partnerId"
-          value={partnerId}
-          onChange={(e) => setPartnerId(e.target.value)}
-          className="border border-gray-300 p-2 rounded w-full"
-          required
-        >
-          <option value="">Select a partner</option>
-          {filteredPartners.map((partner) => (
-            <option key={partner.id} value={partner.id}>
-              {partner.id} - {partner.name}
-            </option>
-          ))}
-        </select>
-      </div>
+          <label htmlFor="partnerId" className="block mb-1">
+            Partner
+          </label>
+          <Select
+            id="partnerId"
+            value={partnerOptions.find((option) => option.value === partnerId)}
+            onChange={(selectedOption) => setPartnerId(selectedOption.value)}
+            options={partnerOptions}
+            filterOption={handlePartnerFilter}
+            placeholder="Search partner"
+            required
+          />
+        </div>
         <div className="mb-4">
           <label htmlFor="customerName" className="block mb-1">
             Customer Name
@@ -202,8 +237,21 @@ const [searchProduct, setSearchProduct] = useState("");
           />
         </div>
         <div className="mb-4">
+          <label htmlFor="phone" className="block mb-1">
+            Phone
+          </label>
+          <input
+            type="text"
+            id="phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="border border-gray-300 p-2 rounded w-full"
+            required
+          />
+        </div>
+        <div className="mb-4">
           <label htmlFor="massOfOrder" className="block mb-1">
-            Mass of Order
+            Weight
           </label>
           <input
             type="number"
@@ -230,30 +278,19 @@ const [searchProduct, setSearchProduct] = useState("");
         </div>
         {/* Product selection */}
         <div className="mb-4">
-        <label htmlFor="products" className="block mb-1">
-          Products
-        </label>
-        <input
-          type="text"
-          id="searchProduct"
-          value={searchProduct}
-          onChange={(e) => setSearchProduct(e.target.value)}
-          className="border border-gray-300 p-2 rounded w-full mb-2"
-          placeholder="Search product"
-        />
-        <select
-          id="products"
-          onChange={(e) => handleProductSelect(parseInt(e.target.value))}
-          className="border border-gray-300 p-2 rounded w-full"
-        >
-          <option value="">Select a product</option>
-          {filteredProducts.map((product) => (
-            <option key={product.id} value={product.id}>
-              {product.name} - {product.sku}
-            </option>
-          ))}
-        </select>
-      </div>
+          <label htmlFor="products" className="block mb-1">
+            Products
+          </label>
+          <Select
+            id="products"
+            onChange={(selectedOption) =>
+              handleProductSelect(selectedOption.value)
+            }
+            options={productOptions}
+            filterOption={handleProductFilter}
+            placeholder="Search product"
+          />
+        </div>
         {/* Selected products */}
         {selectedProducts.length > 0 && (
           <div className="mb-4">
@@ -290,7 +327,7 @@ const [searchProduct, setSearchProduct] = useState("");
                       <input
                         type="number"
                         step="0.01"
-                        value={product.price}
+                        value={product.price || ""}
                         onChange={(e) =>
                           handlePriceChange(
                             product.id,

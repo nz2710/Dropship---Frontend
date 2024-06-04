@@ -26,7 +26,7 @@ const User = () => {
     }
 
     async function addUser() {
-        const response = await fetch(`${API_URL}/admin/create`, {
+        const response = await fetch(`${API_URL}/api/admin/create`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${cookies.token}`,
@@ -50,7 +50,7 @@ const User = () => {
         }
     }
     const handleBan = async (item) => {
-        const response = await fetch(`${API_URL}/admin/ban/user/${item.id}`, {
+        const response = await fetch(`${API_URL}/api/admin/ban/user/${item.id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -66,7 +66,7 @@ const User = () => {
         }
     }
     const handleUnBan = async (item) => {
-        const response = await fetch(`${API_URL}/admin/unban/user/${item.id}`, {
+        const response = await fetch(`${API_URL}/api/admin/unban/user/${item.id}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -82,7 +82,7 @@ const User = () => {
         }
     }
     const handleLoadData = async () => {
-        const response = await fetch(`${API_URL}/admin/users?pageSize=${dataPerPage}&page=${currentPage}`, {
+        const response = await fetch(`${API_URL}/api/admin/users?pageSize=${dataPerPage}&page=${currentPage}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

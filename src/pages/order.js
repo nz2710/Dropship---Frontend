@@ -5,6 +5,7 @@ import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddOrderForm from "../components/order/AddOrderForm";
+import OrderDetailForm from "../components/order/OrderDetailForm";
 
 function OrderPage() {
   const [orderBy, setOrderBy] = useState("id");
@@ -14,6 +15,11 @@ function OrderPage() {
   const [currentPageData, setCurrentPageData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showDetailForm, setShowDetailForm] = useState(false);
+  const [currentProductPage, setCurrentProductPage] = useState(1);
+  const [productPageCount, setProductPageCount] = useState(0);
+  const [selectedOrderProducts, setSelectedOrderProducts] = useState(null);
   const dataPerPage = 10;
   const [cookies] = useCookies(["token"]);
 
@@ -37,7 +43,7 @@ function OrderPage() {
   };
 
   const handleLoadData = async (page = currentPage) => {
-    const url = new URL(`${API_URL2}/admin/order`);
+    const url = new URL(`${API_URL2}/api/admin/order`);
     url.searchParams.append("pageSize", dataPerPage);
     url.searchParams.append("order_by", orderBy);
     url.searchParams.append("sort_by", sortBy);
@@ -94,7 +100,7 @@ function OrderPage() {
 
   const handleDelete = async (item) => {
     try {
-      const response = await fetch(`${API_URL2}/admin/order/${item.id}`, {
+      const response = await fetch(`${API_URL2}/api/admin/order/${item.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -111,6 +117,67 @@ function OrderPage() {
     } catch (error) {
       toast.error("Error: " + error.message);
     }
+  };
+
+  const handleShowDetail = async (item) => {
+    try {
+      const response = await fetch(
+        `${API_URL2}/api/admin/order/${item.id}?page=1&pageSize=5`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setSelectedOrder(data.data);
+        setSelectedOrderProducts(data.data.products);
+        setCurrentProductPage(data.current_page);
+        setProductPageCount(data.last_page);
+        setShowDetailForm(true);
+      } else {
+        throw new Error("Failed to fetch product details");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleProductPageChange = async (selectedPage) => {
+    const currentPage = selectedPage.selected + 1;
+    try {
+      const response = await fetch(
+        `${API_URL2}/api/admin/order/${selectedOrder.id}?page=${currentPage}&pageSize=5`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setSelectedOrderProducts(data.data.products);
+        setCurrentProductPage(data.current_page);
+      } else {
+        throw new Error("Failed to fetch partner orders");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleCloseDetailForm = () => {
+    setSelectedOrder(null);
+    setShowDetailForm(false);
   };
 
   useEffect(() => {
@@ -131,12 +198,7 @@ function OrderPage() {
         pauseOnHover
       />
       <div className="w-full">
-        {showAddForm ? (
-          <AddOrderForm
-            onClose={handleCloseAddForm}
-            onOrderAdded={handleOrderAdded}
-          />
-        ) : (
+        {!showAddForm && !showDetailForm ? (
           // Nội dung hiển thị khi không có form add order
           <>
             {/* ... */}
@@ -206,9 +268,9 @@ function OrderPage() {
                   >
                     Customer
                   </th>
-                  <th className="border px-4 py-2" style={{ width: "7%" }}>
+                  {/* <th className="border px-4 py-2" style={{ width: "7%" }}>
                     Phone
-                  </th>
+                  </th> */}
                   <th className="border px-4 py-2" style={{ width: "30%" }}>
                     Address
                   </th>
@@ -226,7 +288,7 @@ function OrderPage() {
                     )}`}
                     onClick={() => handleSort("mass_of_order")}
                   >
-                    Mass
+                    Weight
                   </th>
                   <th
                     className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
@@ -253,19 +315,38 @@ function OrderPage() {
                 {currentPageData.map((item) => (
                   <tr key={item.id}>
                     <td className="border px-4 py-2">{item.id}</td>
-                    <td className="border px-4 py-2">{item.partner.name}</td>
+                    <td className="border px-4 py-2">
+                      {item.partner?.name ?? "No Partner"}
+                    </td>
                     <td className="border px-4 py-2">{item.code_order}</td>
                     <td className="border px-4 py-2">{item.customer_name}</td>
-                    <td className="border px-4 py-2">{item.phone}</td>
+                    {/* <td className="border px-4 py-2">{item.phone}</td> */}
                     <td className="border px-4 py-2">{item.address}</td>
-                    <td className="border px-4 py-2">{item.price}</td>
-                    <td className="border px-4 py-2">{item.mass_of_order}</td>
+                    <td className="border px-4 py-2">
+                      {item.price
+                        ? parseFloat(item.price).toLocaleString("vi-VN", {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          })
+                        : ""}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {parseFloat(item.mass_of_order)}
+                    </td>
                     <td className="border px-4 py-2">{item.time_service}</td>
-                    <td className="border px-4 py-2">{item.status}</td>
+                    <td className="border px-4 py-2">
+                      {item.status === "success" ? (
+                        <span className="text-green-500">Success</span>
+                      ) : item.status === "delivery" ? (
+                        <span className="text-yellow-500">Delivery</span>
+                      ) : (
+                        <span className="text-red-500">Pending</span>
+                      )}
+                    </td>
                     <td className="border px-4 py-2">
                       <div className="flex gap-2">
                         <button
-                          //   onClick={() => handleShowDetail(item)}
+                          onClick={() => handleShowDetail(item)}
                           className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
                         >
                           Detail
@@ -295,6 +376,21 @@ function OrderPage() {
               forcePage={currentPage - 1}
             />
           </>
+        ) : showAddForm ? (
+          <AddOrderForm
+            onClose={handleCloseAddForm}
+            onOrderAdded={handleOrderAdded}
+          />
+        ) : (
+          <OrderDetailForm
+            order={selectedOrder}
+            onClose={handleCloseDetailForm}
+            products={selectedOrderProducts}
+            currentPage={currentProductPage}
+            pageCount={productPageCount}
+            onPageChange={handleProductPageChange}
+            // onProductUpdated={handleProductUpdated}
+          />
         )}
       </div>
     </div>

@@ -1,26 +1,38 @@
 import React from "react";
-import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
-function AddDepotForm({ showModal, setShowModal, handleSubmit, handleInputChange }) {
-  const accessToken =
-    "pk.eyJ1IjoibmdvZHVuZzI3MTAiLCJhIjoiY2x2MjF1eTQxMGR4NjJsbWlsMWZmZHluYiJ9.zBLJ9oWBuSXllU5S0zsS2Q";
+function AddDepotForm({
+  showModal,
+  setShowModal,
+  handleSubmit,
+  handleInputChange,
+}) {
+  const goongApiKey = "VWEykUxNr5f4DReznrCTAtui2DL8iuXXdjapLuJv";
+  const [suggestions, setSuggestions] = useState([]);
+  const handleAddressInput = async (event) => {
+    const input = event.target.value;
+    handleInputChange({ target: { name: "address", value: input } });
+    if (input.length > 2) {
+      const response = await fetch(
+        `https://rsapi.goong.io/Place/AutoComplete?api_key=${goongApiKey}&input=${encodeURIComponent(
+          input
+        )}`
+      );
+      const data = await response.json();
+      setSuggestions(data.predictions);
+    } else {
+      setSuggestions([]);
+    }
+  };
 
-  useEffect(() => {
+  const handleSuggestionClick = (suggestion) => {
     const addressInput = document.getElementById("address-input");
     if (addressInput) {
-      const geocoder = new MapboxGeocoder({
-        accessToken: accessToken,
-        types: "address",
-        placeholder: "Enter address",
-      });
-      geocoder.addTo(addressInput);
-      geocoder.on("result", (e) => {
-        const selectedAddress = e.result.place_name;
-        handleInputChange({ target: { name: "address", value: selectedAddress } });
-      });
+      addressInput.value = suggestion.description;
+      handleInputChange({ target: { name: "address", value: suggestion.description } });
     }
-  }, [showModal]);
+    setSuggestions([]);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -34,10 +46,29 @@ function AddDepotForm({ showModal, setShowModal, handleSubmit, handleInputChange
             onChange={handleInputChange}
             className="block w-full p-2 border border-gray-300 rounded"
           />
-          <div
-            id="address-input"
-            className="block w-full p-2 border border-gray-300 rounded"
-          ></div>
+          <div className="relative">
+            <input
+              type="text"
+              id="address-input"
+              name="address"
+              placeholder="Enter address"
+              onInput={handleAddressInput}
+              className="block w-full p-2 border border-gray-300 rounded"
+            />
+            {suggestions && suggestions.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-48 overflow-y-auto">
+                {suggestions.map((suggestion) => (
+                  <li
+                    key={suggestion.place_id}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    className="px-2 py-1 cursor-pointer hover:bg-gray-100"
+                  >
+                    {suggestion.description}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="flex justify-end space-x-4">
             <button
               type="button"

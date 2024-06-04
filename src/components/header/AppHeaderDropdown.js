@@ -32,7 +32,7 @@ const AppHeaderDropdown = () => {
   const [cookies, removeCookie] = useCookies(["token"]);
   const logout = async () => {
     try {
-      await fetch(`${API_URL}/logout`, {
+      await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${cookies.token}`,

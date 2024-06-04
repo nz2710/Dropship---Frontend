@@ -76,10 +76,10 @@ function DepotDetailsModal({
               <strong>Code:</strong> D{selectedDepot.id}
             </p>
             <p>
-              <strong>Longitude:</strong> {selectedDepot.longitude}
+              <strong>Longitude:</strong> {parseFloat(selectedDepot.longitude)}
             </p>
             <p>
-              <strong>Latitude:</strong> {selectedDepot.latitude}
+              <strong>Latitude:</strong> {parseFloat(selectedDepot.latitude)}
             </p>
             <p>
               <strong>Created Time:</strong>{" "}

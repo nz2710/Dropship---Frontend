@@ -13,7 +13,7 @@ function PartnerPage() {
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPageData, setCurrentPageData] = useState([]);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   const [currentOrderPage, setCurrentOrderPage] = useState(1);
@@ -32,7 +32,7 @@ function PartnerPage() {
 
   const handleDelete = async (item) => {
     try {
-      const response = await fetch(`${API_URL2}/admin/partner/${item.id}`, {
+      const response = await fetch(`${API_URL2}/api/admin/partner/${item.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +52,7 @@ function PartnerPage() {
   };
 
   const handleLoadData = async (page = currentPage) => {
-    const url = new URL(`${API_URL2}/admin/partner`);
+    const url = new URL(`${API_URL2}/api/admin/partner`);
     url.searchParams.append("pageSize", dataPerPage);
     url.searchParams.append("order_by", orderBy);
     url.searchParams.append("sort_by", sortBy);
@@ -103,7 +103,7 @@ function PartnerPage() {
   const handleShowDetail = async (item) => {
     try {
       const response = await fetch(
-        `${API_URL2}/admin/partner/${item.id}?page=1&pageSize=5`,
+        `${API_URL2}/api/admin/partner/${item.id}?page=1&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -133,7 +133,7 @@ function PartnerPage() {
     const currentPage = selectedPage.selected + 1;
     try {
       const response = await fetch(
-        `${API_URL2}/admin/partner/${selectedPartner.id}?page=${currentPage}&pageSize=5`,
+        `${API_URL2}/api/admin/partner/${selectedPartner.id}?page=${currentPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -165,7 +165,7 @@ function PartnerPage() {
     try {
       setSelectedPartner(updatedPartner);
       const response = await fetch(
-        `${API_URL2}/admin/partner/${updatedPartner.id}?page=${currentOrderPage}&pageSize=5`,
+        `${API_URL2}/api/admin/partner/${updatedPartner.id}?page=${currentOrderPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -175,7 +175,7 @@ function PartnerPage() {
           },
         }
       );
-  
+
       if (response.status === 200) {
         const data = await response.json();
         setSelectedPartnerOrders(data.data.orders);
@@ -315,10 +315,26 @@ function PartnerPage() {
                     <td className="border px-4 py-2">{item.phone}</td>
                     <td className="border px-4 py-2">{item.number_of_order}</td>
                     {/* <td className="border px-4 py-2">{item.discount}</td> */}
-                    <td className="border px-4 py-2">{item.revenue}</td>
-                    <td className="border px-4 py-2">{item.commission}</td>
                     <td className="border px-4 py-2">
-                      {item.status === "1" ? (
+                      {" "}
+                      {item.revenue
+                        ? parseFloat(item.revenue).toLocaleString("vi-VN", {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          })
+                        : ""}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {" "}
+                      {item.commission
+                        ? parseFloat(item.commission).toLocaleString("vi-VN", {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          })
+                        : ""}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {item.status === "Active" ? (
                         <span className="text-green-500">Active</span>
                       ) : (
                         <span className="text-red-500">Inactive</span>

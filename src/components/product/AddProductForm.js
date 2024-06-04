@@ -17,13 +17,13 @@ function AddProductForm({ onClose, onProductAdded }) {
     try {
       const formData = new FormData();
       formData.append("name", name);
-      formData.append("description", description);
+      formData.append("description", description || "");
       formData.append("price", price);
       formData.append("cost", cost);
       formData.append("quantity", quantity);
-      formData.append("image", image);
+      formData.append("image", image || "");
 
-      const response = await fetch(`${API_URL2}/admin/product`, {
+      const response = await fetch(`${API_URL2}/api/admin/product`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -82,7 +82,6 @@ function AddProductForm({ onClose, onProductAdded }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="border border-gray-300 p-2 rounded w-full"
-            required
           ></textarea>
         </div>
         <div className="flex mb-4">
@@ -138,7 +137,6 @@ function AddProductForm({ onClose, onProductAdded }) {
             accept="image/*"
             onChange={(e) => setImage(e.target.files[0])}
             className="border border-gray-300 p-2 rounded w-full"
-            required
           />
         </div>
         <div className="flex justify-end mt-4">

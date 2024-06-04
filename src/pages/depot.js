@@ -6,7 +6,7 @@ import AddDepotForm from "../components/depot/AddDepotForm";
 import DepotDetailsModal from "../components/depot/DepotDetailsModal";
 import "react-toastify/dist/ReactToastify.css";
 import ReactPaginate from "react-paginate";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+
 
 function Depot() {
   const [cookies] = useCookies(["token"]);
@@ -33,7 +33,7 @@ function Depot() {
 
   const handleLoadData = async (page = currentPage) => {
     try {
-      const url = new URL(`${API_URL2}/admin/depot`);
+      const url = new URL(`${API_URL2}/api/admin/depot`);
       url.searchParams.append("pageSize", dataPerPage);
       url.searchParams.append("order_by", orderBy);
       url.searchParams.append("sort_by", sortBy);
@@ -73,7 +73,7 @@ function Depot() {
 
   const handleDelete = async (item) => {
     try {
-      const response = await fetch(`${API_URL2}/admin/depot/${item.id}`, {
+      const response = await fetch(`${API_URL2}/api/admin/depot/${item.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +100,7 @@ function Depot() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/admin/depot`, {
+      const response = await fetch(`${API_URL2}/api/admin/depot`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -124,7 +124,7 @@ function Depot() {
   const handleSaveDepot = async () => {
     try {
       const response = await fetch(
-        `${API_URL2}/admin/depot/${selectedDepot.id}`,
+        `${API_URL2}/api/admin/depot/${selectedDepot.id}`,
         {
           method: "PUT",
           headers: {
@@ -312,7 +312,7 @@ function Depot() {
                 <td className="border px-4 py-2">{item.latitude}</td> */}
                 <td className="border px-4 py-2 ">{item.address}</td>
                 <td className="border px-4 py-2">
-                  {item.status === "1" ? (
+                  {item.status === "Active" ? (
                     <span className="text-green-500">Active</span>
                   ) : (
                     <span className="text-red-500">Inactive</span>

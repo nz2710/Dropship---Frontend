@@ -19,7 +19,7 @@ function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, o
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${API_URL2}/admin/partner/${partner.id}`, {
+      const response = await fetch(`${API_URL2}/api/admin/partner/${partner.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -189,8 +189,9 @@ function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, o
             <th className="border px-4 py-2">ID</th>
             <th className="border px-4 py-2">Code Order</th>
             <th className="border px-4 py-2">Customer Name</th>
+            <th className="border px-4 py-2">Phone</th>
             <th className="border px-4 py-2">Price</th>
-            <th className="border px-4 py-2">Mass</th>
+            <th className="border px-4 py-2">Discount</th>
             <th className="border px-4 py-2">Address</th>
             <th className="border px-4 py-2">Status</th>
           </tr>
@@ -201,8 +202,9 @@ function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, o
               <td className="border px-4 py-2">{order.id}</td>
               <td className="border px-4 py-2">{order.code_order}</td>
               <td className="border px-4 py-2">{order.customer_name}</td>
+              <td className="border px-4 py-2">{order.phone}</td>
               <td className="border px-4 py-2">{order.price}</td>
-              <td className="border px-4 py-2">{order.mass_of_order}</td>
+              <td className="border px-4 py-2">{order.discount}</td>
               <td className="border px-4 py-2">{order.address}</td>
               <td className="border px-4 py-2">{order.status}</td>
             </tr>

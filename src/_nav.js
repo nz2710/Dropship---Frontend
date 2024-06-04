@@ -8,7 +8,7 @@ import {
   // cilContact,
   cilPeople,
   cilCarAlt,
-  // cilGift,
+  cilGift,
   // cilPeoplePlus,
   cilHome
 } from '@coreui/icons'
@@ -29,6 +29,12 @@ const _nav = [
   },
   {
     component: CNavItem,
+    name: 'Vehicle',
+    to: '/vehicle',
+    icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
     name: 'Partner',
     to: '/partner',
     icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
@@ -45,12 +51,12 @@ const _nav = [
     to: '/order',
     icon: <CIcon icon={cilBoatAlt} customClassName="nav-icon" />,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Sản phẩm',
-  //   to: '/googlemap',
-  //   icon: <CIcon icon={cilGift} customClassName="nav-icon" />,
-  // },
+  {
+    component: CNavItem,
+    name: 'Plan',
+    to: '/plan',
+    icon: <CIcon icon={cilGift} customClassName="nav-icon" />,
+  },
 
   // {
   //   component: CNavItem,
