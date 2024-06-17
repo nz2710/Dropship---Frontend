@@ -1,10 +1,6 @@
 import React from "react";
-import { useState, useEffect } from "react";
-import { API_URL2 } from "../../utils/constant";
-// import { useCookies } from "react-cookie";
-// import { toast } from "react-toastify";
 import ReactPaginate from "react-paginate";
-import RouteDetailForm from "./RouteDetailForm";
+import { useCookies } from "react-cookie";
 
 function PlanDetailForm({
   plan,
@@ -14,11 +10,16 @@ function PlanDetailForm({
   onClose,
   onPageChange,
 }) {
-  const [showRouteDetails, setShowRouteDetails] = useState(false);
-  const [selectedRoute, setSelectedRoute] = useState(null);
-  const handleViewDetails = (route) => {
-    setSelectedRoute(route);
-    setShowRouteDetails(true);
+  const [cookies] = useCookies(["token"]);
+  const handleViewDetails = (routeId) => {
+    const token = cookies.token;
+    const newUrl = `/route/${routeId}?token=${token}`;
+  
+    // Thay đổi URL mà không có tham số token
+    window.history.pushState({}, "", `/route/${routeId}`);
+  
+    // Mở tab mới với URL chứa token
+    window.open(newUrl, "_blank");
   };
   return (
     <div className="p-2">
@@ -32,7 +33,6 @@ function PlanDetailForm({
         <div className="w-1/2 ml-2">
           <label className="block mb-1 font-bold">Status</label>
           <p>
-            {/* {" "} */}
             {plan.status === "success" ? (
               <span className="text-green-500">Success</span>
             ) : plan.status === "delivery" ? (
@@ -45,52 +45,50 @@ function PlanDetailForm({
       </div>
       <div className="flex">
         <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Total Distance</label>
+          <label className="block mb-1 font-bold">Total Distance (km)</label>
           <p>{parseFloat(plan.total_distance)}</p>
         </div>
         <div className="w-1/2 ml-2">
           <label className="block mb-1 font-bold">
-            Total Unallocated Distance
+            Total Unallocated Distance (km)
           </label>
           <p>{parseFloat(plan.total_distance_without_allocating_vehicles)}</p>
         </div>
       </div>
       <div className="flex">
         <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Total Time</label>
+          <label className="block mb-1 font-bold">Total Time (minutes)</label>
           <p>{parseFloat(plan.total_time_serving)}</p>
-          {/* )} */}
         </div>
         <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Total Unallocated Time</label>
+          <label className="block mb-1 font-bold">
+            Total Unallocated Time (minutes)
+          </label>
           <p>
             {parseFloat(plan.total_time_serving_without_allocating_vehicles)}
           </p>
-          {/* )} */}
         </div>
       </div>
       <div className="flex">
         <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Total Demand</label>
+          <label className="block mb-1 font-bold">Total Demand (kg)</label>
           <p>{parseFloat(plan.total_demand)}</p>
           {/* )} */}
         </div>
         <div className="w-1/2 ml-2">
           <label className="block mb-1 font-bold">
-            Total Unallocated Demand
+            Total Unallocated Demand (kg)
           </label>
           <p>{parseFloat(plan.total_demand_without_allocating_vehicles)}</p>
         </div>
       </div>
       <div className="flex">
         <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Total Fee</label>
+          <label className="block mb-1 font-bold">Total Fee (VND)</label>
           <p>
-            {" "}
             {plan.fee
-              ? parseFloat(plan.fee).toLocaleString("vi-VN", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
+              ? parseFloat(plan.fee).toLocaleString("en-US", {
+                  maximumSignificantDigits: 20,
                 })
               : ""}
           </p>
@@ -112,6 +110,17 @@ function PlanDetailForm({
           <p>{plan.total_num_customer_not_served}</p>
         </div>
       </div>
+      <div className="flex">
+        <div className="w-1/2 mr-2">
+          <label className="block mb-1 font-bold">Created at</label>
+          <p>{new Date(plan.created_at).toLocaleString()}</p>
+          {/* )} */}
+        </div>
+        <div className="w-1/2 ml-2">
+          <label className="block mb-1 font-bold">Updated at</label>
+          <p>{new Date(plan.updated_at).toLocaleString()}</p>
+        </div>
+      </div>
 
       {/* Thêm bảng hiển thị thông tin product ở đây */}
       <div className="flex items-center justify-between mb-4">
@@ -122,10 +131,10 @@ function PlanDetailForm({
         <thead>
           <tr>
             <th className="border px-4 py-2">ID</th>
-            <th className="border px-4 py-2">Demand</th>
-            <th className="border px-4 py-2">Distance</th>
-            <th className="border px-4 py-2">Time</th>
             <th className="border px-4 py-2">Depot</th>
+            <th className="border px-4 py-2">Demand (kg)</th>
+            <th className="border px-4 py-2">Distance (km)</th>
+            <th className="border px-4 py-2">Time (minutes)</th>
             <th className="border px-4 py-2">Status</th>
             <th className="border px-4 py-2">Action</th>
           </tr>
@@ -134,6 +143,7 @@ function PlanDetailForm({
           {routes.map((route) => (
             <tr key={route.id}>
               <td className="border px-4 py-2">{route.id}</td>
+              <td className="border px-4 py-2">{route.depot_name}</td>
               <td className="border px-4 py-2">
                 {parseFloat(route.total_demand)}
               </td>
@@ -143,54 +153,39 @@ function PlanDetailForm({
               <td className="border px-4 py-2">
                 {parseFloat(route.total_time_serving)}
               </td>
-              <td className="border px-4 py-2">{route.depot_name}</td>
               <td className="border px-4 py-2">
-                {" "}
                 {route.is_served === 1 ? (
                   <span className="text-green-500">Served</span>
                 ) : (
                   <span className="text-red-500">Unserved</span>
                 )}
               </td>
-              <td className="border px-4 py-2">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleViewDetails(route)}
-                    className="bg-blue-500 hover:bg-blue-700 text-white  p-2  rounded-lg"
-                  >
-                    View Details
-                  </button>
-                  <button
-                    //   onClick={() => handleShowMap(route.id)}
-                    className=" bg-green-500 hover:bg-green-700 text-white p-2 rounded-lg"
-                  >
-                    Show on Map
-                  </button>
-                </div>
+              <td className="border py-3 text-center">
+                <button
+                  onClick={() => handleViewDetails(route.id)}
+                  className="bg-blue-500 hover:bg-blue-700 text-white p-2 rounded-lg"
+                >
+                  View Details
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <ReactPaginate
-        previousLabel={"Previous"}
-        nextLabel={"Next"}
-        pageCount={pageCount}
-        onPageChange={onPageChange}
-        containerClassName={"pagination"}
-        previousLinkClassName={"pagination__link"}
-        nextLinkClassName={"pagination__link"}
-        disabledClassName={"pagination__link--disabled"}
-        activeClassName={"pagination__link--active"}
-        forcePage={currentPage - 1}
-      />
-      {showRouteDetails && selectedRoute && (
-        <RouteDetailForm
-          route={selectedRoute}
-          onClose={() => setShowRouteDetails(false)}
+      {pageCount > 0 && (
+        <ReactPaginate
+          previousLabel={"Previous"}
+          nextLabel={"Next"}
+          pageCount={pageCount}
+          onPageChange={onPageChange}
+          containerClassName={"pagination"}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
+          forcePage={currentPage - 1}
         />
       )}
-
       <div className="flex justify-end">
         <button
           onClick={onClose}
@@ -198,8 +193,6 @@ function PlanDetailForm({
         >
           Close
         </button>
-        {/* </>
-        )} */}
       </div>
     </div>
   );

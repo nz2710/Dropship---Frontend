@@ -1,12 +1,7 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-function AddDepotForm({
-  showModal,
-  setShowModal,
-  handleSubmit,
-  handleInputChange,
-}) {
+function AddDepotForm({ setShowModal, handleSubmit, handleInputChange }) {
   const goongApiKey = "VWEykUxNr5f4DReznrCTAtui2DL8iuXXdjapLuJv";
   const [suggestions, setSuggestions] = useState([]);
   const handleAddressInput = async (event) => {
@@ -29,7 +24,9 @@ function AddDepotForm({
     const addressInput = document.getElementById("address-input");
     if (addressInput) {
       addressInput.value = suggestion.description;
-      handleInputChange({ target: { name: "address", value: suggestion.description } });
+      handleInputChange({
+        target: { name: "address", value: suggestion.description },
+      });
     }
     setSuggestions([]);
   };
@@ -43,6 +40,13 @@ function AddDepotForm({
             type="text"
             name="name"
             placeholder="Depot Name"
+            onChange={handleInputChange}
+            className="block w-full p-2 border border-gray-300 rounded"
+          />
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone"
             onChange={handleInputChange}
             className="block w-full p-2 border border-gray-300 rounded"
           />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ReactPaginate from "react-paginate";
 import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
@@ -24,7 +24,7 @@ function Plan() {
   const handleShowDetail = async (item) => {
     try {
       const response = await fetch(
-        `${API_URL2}/api/admin/routing/${item.id}??page=1&pageSize=10`,
+        `${API_URL2}/api/admin/routing/${item.id}?page=1&pageSize=10`,
         {
           method: "GET",
           headers: {
@@ -85,7 +85,7 @@ function Plan() {
     handleLoadData(selectedPage + 1);
   };
 
-  const handleLoadData = async (page = currentPage) => {
+  const handleLoadData = useCallback(async (page = currentPage) => {
     const url = new URL(`${API_URL2}/api/admin/routing`);
     url.searchParams.append("pageSize", dataPerPage);
     url.searchParams.append("order_by", orderBy);
@@ -113,7 +113,7 @@ function Plan() {
     } else {
       console.log("Fail", response);
     }
-  };
+  }, [cookies.token, currentPage, dataPerPage, orderBy, searchTerm, sortBy]);
 
   const handleSort = (column) => {
     if (orderBy === column) {
@@ -153,7 +153,7 @@ function Plan() {
 
   useEffect(() => {
     handleLoadData();
-  }, [currentPage, searchTerm, orderBy, sortBy]);
+  }, [currentPage, searchTerm, orderBy, sortBy, handleLoadData]);
 
   return (
     <div className="flex justify-center bg-white p-3 m-3 rounded-md">
@@ -180,143 +180,143 @@ function Plan() {
                 className="border border-gray-300 p-2 rounded-md"
               />
             </div>
-            <table className="min-w-full">
-              <thead>
-                <tr>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "id"
-                    )}`}
-                    onClick={() => handleSort("id")}
-                  >
-                    ID
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
-                      "name"
-                    )}`}
-                    onClick={() => handleSort("name")}
-                  >
-                    Name
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "total_distance"
-                    )}`}
-                    onClick={() => handleSort("total_distance")}
-                  >
-                    Total Distance (km)
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "total_time_serving"
-                    )}`}
-                    onClick={() => handleSort("total_time_serving")}
-                  >
-                    Total Time (minutes)
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "total_demand"
-                    )}`}
-                    onClick={() => handleSort("total_demand")}
-                  >
-                    Total Demand (kg)
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "fee"
-                    )}`}
-                    onClick={() => handleSort("fee")}
-                  >
-                    Fee (VND)
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "status"
-                    )}`}
-                    onClick={() => handleSort("status")}
-                  >
-                    Status
-                  </th>
-                  {/* <th className="border px-4 py-2">Kinh độ</th>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-fixed">
+                <thead>
+                  <tr>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "id"
+                      )}`}
+                      onClick={() => handleSort("id")}
+                    >
+                      ID
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
+                        "name"
+                      )}`}
+                      onClick={() => handleSort("name")}
+                    >
+                      Name
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "total_distance"
+                      )}`}
+                      onClick={() => handleSort("total_distance")}
+                    >
+                      Total Distance (km)
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "total_time_serving"
+                      )}`}
+                      onClick={() => handleSort("total_time_serving")}
+                    >
+                      Total Time (minutes)
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "total_demand"
+                      )}`}
+                      onClick={() => handleSort("total_demand")}
+                    >
+                      Total Demand (kg)
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "fee"
+                      )}`}
+                      onClick={() => handleSort("fee")}
+                    >
+                      Fee (VND)
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "status"
+                      )}`}
+                      onClick={() => handleSort("status")}
+                    >
+                      Status
+                    </th>
+                    {/* <th className="border px-4 py-2">Kinh độ</th>
               <th className="border px-4 py-2">Vĩ độ</th>
               <th className="border px-4 py-2">Thời gian phục vụ</th> */}
-                  <th className="border px-4 py-2">Operation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPageData.map((item) => (
-                  <tr key={item.id}>
-                    <td className="border px-4 py-2">{item.id}</td>
-                    <td className="border px-4 py-2">{item.name}</td>
-                    <td className="border px-4 py-2">
-                      {parseFloat(item.total_distance)}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {parseFloat(item.total_time_serving)}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {parseFloat(item.total_demand)}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {item.fee
-                        ? parseFloat(item.fee).toLocaleString("vi-VN", {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })
-                        : ""}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {item.status === "success" ? (
-                        <span className="text-green-500">Success</span>
-                      ) : item.status === "delivery" ? (
-                        <span className="text-yellow-500">Delivery</span>
-                      ) : (
-                        <span className="text-red-500">Pending</span>
-                      )}
-                    </td>
-                    {/* <td className="border px-4 py-2">{item.col4}</td>
-                <td className="border px-4 py-2">{item.col5}</td>
-                <td className="border px-4 py-2">{item.col6}</td> */}
-                    <td className="border px-2 py-2">
-                      <div className="flex gap-1">
-                        <button
-                          //   onClick={() => handleShowDetail(item)}
-                          className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-800"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          onClick={() => handleShowDetail(item)}
-                          className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
-                        >
-                          Detail
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item)}
-                          className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-800"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
+                    <th className="border px-4 py-2">Operation</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <ReactPaginate
-              previousLabel={"Previous"}
-              nextLabel={"Next"}
-              pageCount={pageCount}
-              onPageChange={handlePageChange}
-              containerClassName={"pagination"}
-              previousLinkClassName={"pagination__link"}
-              nextLinkClassName={"pagination__link"}
-              disabledClassName={"pagination__link--disabled"}
-              activeClassName={"pagination__link--active"}
-              forcePage={currentPage - 1}
-            />
+                </thead>
+                <tbody>
+                  {currentPageData.map((item) => (
+                    <tr key={item.id}>
+                      <td className="border px-4 py-2">{item.id}</td>
+                      <td className="border px-4 py-2">{item.name}</td>
+                      <td className="border px-4 py-2">
+                        {parseFloat(item.total_distance)}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {parseFloat(item.total_time_serving)}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {parseFloat(item.total_demand)}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {item.fee
+                          ? parseFloat(item.fee).toLocaleString("en-US", {
+                              maximumSignificantDigits: 20,
+                            })
+                          : ""}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {item.status === "success" ? (
+                          <span className="text-green-500">Success</span>
+                        ) : item.status === "delivery" ? (
+                          <span className="text-yellow-500">Delivery</span>
+                        ) : (
+                          <span className="text-red-500">Pending</span>
+                        )}
+                      </td>
+                      <td className="border px-2 py-2">
+                        <div className="flex gap-1">
+                          <button
+                            //   onClick={() => handleShowDetail(item)}
+                            className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-800"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => handleShowDetail(item)}
+                            className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
+                          >
+                            Detail
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item)}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-800"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {pageCount > 0 && (
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                pageCount={pageCount}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                previousLinkClassName={"pagination__link"}
+                nextLinkClassName={"pagination__link"}
+                disabledClassName={"pagination__link--disabled"}
+                activeClassName={"pagination__link--active"}
+                forcePage={currentPage - 1}
+              />
+            )}
           </>
         ) : (
           <PlanDetailForm

@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
-import ReactPaginate from 'react-paginate';
-import {toast} from "react-toastify";
+import ReactPaginate from "react-paginate";
+import { toast } from "react-toastify";
 
-
-function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, onPartnerUpdated, onPageChange }) {
+function PartnerDetailForm({
+  partner,
+  orders,
+  currentPage,
+  pageCount,
+  onClose,
+  onPartnerUpdated,
+  onPageChange,
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(partner);
   const [cookies] = useCookies(["token"]);
@@ -19,16 +26,19 @@ function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, o
 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${API_URL2}/api/admin/partner/${partner.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-        body: JSON.stringify(formData),
-      });
-  
+      const response = await fetch(
+        `${API_URL2}/api/admin/partner/${partner.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
       if (response.status === 200) {
         toast.success("Partner information updated successfully.");
         const data = await response.json();
@@ -99,11 +109,17 @@ function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, o
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             >
-              <option value="1">Active</option>
-              <option value="0">Inactive</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
             </select>
           ) : (
-            <p>{partner.status === "1" ? "Active" : "Inactive"}</p>
+            <p>
+              {partner.status === "Active" ? (
+                <span className="text-green-500">Active</span>
+              ) : (
+                <span className="text-red-500">Inactive</span>
+              )}
+            </p>
           )}
         </div>
       </div>
@@ -163,11 +179,23 @@ function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, o
       <div className="flex">
         <div className="w-1/2 mr-2">
           <label className="block mb-1 font-bold">Revenue</label>
-          <p>{partner.revenue}</p>
+          <p>
+            {partner.revenue
+              ? parseFloat(partner.revenue).toLocaleString("en-US", {
+                  maximumSignificantDigits: 20,
+                })
+              : ""}
+          </p>
         </div>
         <div className="w-1/2 ml-2">
           <label className="block mb-1 font-bold">Commission</label>
-          <p>{partner.commission}</p>
+          <p>
+            {partner.commission
+              ? parseFloat(partner.commission).toLocaleString("en-US", {
+                  maximumSignificantDigits: 20,
+                })
+              : ""}
+          </p>
         </div>
       </div>
       <div className="flex">
@@ -203,27 +231,42 @@ function PartnerDetailForm({ partner, orders, currentPage, pageCount, onClose, o
               <td className="border px-4 py-2">{order.code_order}</td>
               <td className="border px-4 py-2">{order.customer_name}</td>
               <td className="border px-4 py-2">{order.phone}</td>
-              <td className="border px-4 py-2">{order.price}</td>
-              <td className="border px-4 py-2">{order.discount}</td>
+              <td className="border px-4 py-2">
+                {order.price
+                  ? parseFloat(order.price).toLocaleString("en-US", {
+                      maximumSignificantDigits: 20,
+                    })
+                  : ""}
+              </td>
+              <td className="border px-4 py-2">{parseFloat(order.discount)}</td>
               <td className="border px-4 py-2">{order.address}</td>
-              <td className="border px-4 py-2">{order.status}</td>
+              <td className="border px-4 py-2">
+                {order.status === "Success" ? (
+                  <span className="text-green-500">Success</span>
+                ) : order.status === "Delivery" ? (
+                  <span className="text-yellow-500">Delivery</span>
+                ) : (
+                  <span className="text-red-500">Pending</span>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <ReactPaginate
-      previousLabel={'Previous'}
-      nextLabel={'Next'}
-      pageCount={pageCount}
-      onPageChange={onPageChange}
-      containerClassName={'pagination'}
-      previousLinkClassName={'pagination__link'}
-      nextLinkClassName={'pagination__link'}
-      disabledClassName={'pagination__link--disabled'}
-      activeClassName={'pagination__link--active'}
-      forcePage={currentPage - 1}
-    />
-
+      {pageCount > 0 && (
+        <ReactPaginate
+          previousLabel={"Previous"}
+          nextLabel={"Next"}
+          pageCount={pageCount}
+          onPageChange={onPageChange}
+          containerClassName={"pagination"}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
+          forcePage={currentPage - 1}
+        />
+      )}
       {/* Render other partner details */}
       {/* ... */}
       <div className="flex justify-end">

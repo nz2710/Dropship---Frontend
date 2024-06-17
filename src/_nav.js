@@ -1,15 +1,14 @@
 import React from 'react'
 import CIcon from '@coreui/icons-react'
 import {
-  cilBoatAlt,
-  // cilMap,
   cilSettings,
   cilClipboard,
-  // cilContact,
+  cilCalendar,
   cilPeople,
-  cilCarAlt,
   cilGift,
-  // cilPeoplePlus,
+  cilTruck,
+  cilCart,
+  cilUserPlus,
   cilHome
 } from '@coreui/icons'
 import {  CNavItem } from '@coreui/react'
@@ -31,7 +30,7 @@ const _nav = [
     component: CNavItem,
     name: 'Vehicle',
     to: '/vehicle',
-    icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilTruck} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
@@ -43,19 +42,19 @@ const _nav = [
     component: CNavItem,
     name: 'Product',
     to: '/product',
-    icon: <CIcon icon={cilCarAlt} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilGift} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Order',
     to: '/order',
-    icon: <CIcon icon={cilBoatAlt} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilCart} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Plan',
     to: '/plan',
-    icon: <CIcon icon={cilGift} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
   },
 
   // {
@@ -81,7 +80,7 @@ const _nav = [
     component: CNavItem,
     name: 'User',
     to: '/user',
-    icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilUserPlus} customClassName="nav-icon" />,
   }
 ];
 

@@ -39,52 +39,50 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   };
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const response = await fetch(`${API_URL2}/api/admin/getProduct`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      if (response.status === 200) {
-        const body = await response.json();
-        setProducts(body.data);
-      } else {
-        throw new Error("Failed to fetch products");
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${API_URL2}/api/admin/getProduct`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        if (response.status === 200) {
+          const body = await response.json();
+          setProducts(body.data);
+        } else {
+          throw new Error("Failed to fetch products");
+        }
+      } catch (error) {
+        toast.error("Error: " + error.message);
       }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
-  };
+    };
+    fetchProducts();
+  }, [cookies.token]);
 
   useEffect(() => {
-    fetchPartners();
-  }, []);
-
-  const fetchPartners = async () => {
-    try {
-      const response = await fetch(`${API_URL2}/api/admin/getPartner`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      if (response.status === 200) {
-        const body = await response.json();
-        setPartners(body.data);
-      } else {
-        throw new Error("Failed to fetch partners");
+    const fetchPartners = async () => {
+      try {
+        const response = await fetch(`${API_URL2}/api/admin/getPartner`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        if (response.status === 200) {
+          const body = await response.json();
+          setPartners(body.data);
+        } else {
+          throw new Error("Failed to fetch partners");
+        }
+      } catch (error) {
+        toast.error("Error: " + error.message);
       }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
-  };
+    };
+    fetchPartners();
+  }, [cookies.token]);
 
   const partnerOptions = partners.map((partner) => ({
     value: partner.id,

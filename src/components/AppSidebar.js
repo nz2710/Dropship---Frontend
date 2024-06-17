@@ -6,9 +6,7 @@ import {
   CCloseButton,
   CSidebar,
   CSidebarBrand,
-  CSidebarFooter,
   CSidebarHeader,
-  CSidebarToggler,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 

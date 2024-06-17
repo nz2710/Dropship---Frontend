@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
@@ -14,11 +14,7 @@ function Settings() {
   const [isLoading, setIsLoading] = useState(false);
   const [cookies] = useCookies(["token"]);
 
-  useEffect(() => {
-    fetchVehicles();
-  }, []);
-
-  const fetchVehicles = async () => {
+  const fetchVehicles = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL2}/api/admin/vehicle`, {
         headers: {
@@ -27,7 +23,7 @@ function Settings() {
           Authorization: `Bearer ${cookies.token}`,
         },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         if (data.success && Array.isArray(data.data.data)) {
@@ -42,7 +38,11 @@ function Settings() {
     } catch (error) {
       toast.error("Error: " + error.message);
     }
-  };
+  }, [cookies.token]);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, [fetchVehicles]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -161,7 +161,9 @@ function Settings() {
                   type="checkbox"
                   className="sr-only peer"
                   checked={isVehicleLimitEnabled}
-                  onChange={() => setIsVehicleLimitEnabled(!isVehicleLimitEnabled)}
+                  onChange={() =>
+                    setIsVehicleLimitEnabled(!isVehicleLimitEnabled)
+                  }
                 />
                 <div className="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
               </label>

@@ -1,16 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
-import { CCard, CCardBody, CCol, CCardHeader, CRow } from "@coreui/react";
 import MiniLineChart from "../components/chart/MiniLineChart";
 import AreaChart from "../components/chart/AreaChart";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-// import { DocsCallout } from 'src/components'
 
 const DashBoard = () => {
   const [cookies] = useCookies(["token"]);
-  const [errosMess, setErrosMess] = useState("");
+  const [, setErrosMess] = useState("");
   const [totalDepot, setTotalDepot] = useState(0); // Declare a state variable for total depot
   const [totalOrder, setTotalOrder] = useState(0); // Declare a state variable for total order
   const [totalVehicle, setTotalVehicle] = useState(0); // Declare a state variable for total vehicle
@@ -76,64 +74,61 @@ const DashBoard = () => {
     fetchData(selectedYear, "month", selectedMonth);
   };
 
-  const fetchTopPartner = async (
-    year,
-    filterType,
-    month,
-    metric_type_partner
-  ) => {
-    try {
-      let url = `${API_URL2}/api/admin/dashboard/top-partners?year=${year}&filter_type=${filterType}&metric_type=${metric_type_partner}`;
-      if (filterType === "month" && month) {
-        url += `&month=${month}`;
+  const fetchTopPartner = useCallback(
+    async (year, filterType, month, metric_type_partner) => {
+      try {
+        let url = `${API_URL2}/api/admin/dashboard/top-partners?year=${year}&filter_type=${filterType}&metric_type=${metric_type_partner}`;
+        if (filterType === "month" && month) {
+          url += `&month=${month}`;
+        }
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setTopPartnerData(data.data);
+        } else {
+          console.error("Failed to fetch items sold data");
+        }
+      } catch (error) {
+        console.error("Error fetching items sold data:", error);
       }
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setTopPartnerData(data.data);
-      } else {
-        console.error("Failed to fetch items sold data");
+    },
+    [cookies.token]
+  );
+  const fetchTopProduct = useCallback(
+    async (year, filterType, month, metric_type_product) => {
+      try {
+        let url = `${API_URL2}/api/admin/dashboard/top-products?year=${year}&filter_type=${filterType}&metric_type=${metric_type_product}`;
+        if (filterType === "month" && month) {
+          url += `&month=${month}`;
+        }
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setTopProductData(data.data);
+        } else {
+          console.error("Failed to fetch items sold data");
+        }
+      } catch (error) {
+        console.error("Error fetching items sold data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching items sold data:", error);
-    }
-  };
-  const fetchTopProduct = async (
-    year,
-    filterType,
-    month,
-    metric_type_product
-  ) => {
-    try {
-      let url = `${API_URL2}/api/admin/dashboard/top-products?year=${year}&filter_type=${filterType}&metric_type=${metric_type_product}`;
-      if (filterType === "month" && month) {
-        url += `&month=${month}`;
-      }
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setTopProductData(data.data);
-      } else {
-        console.error("Failed to fetch items sold data");
-      }
-    } catch (error) {
-      console.error("Error fetching items sold data:", error);
-    }
-  };
+    },
+    [cookies.token]
+  );
+
   useEffect(() => {
     fetchTopPartner(
       selectedYear,
@@ -141,7 +136,14 @@ const DashBoard = () => {
       selectedMonth,
       metric_type_partner
     );
-  }, [selectedYear, filterType, selectedMonth, metric_type_partner]);
+  }, [
+    selectedYear,
+    filterType,
+    selectedMonth,
+    metric_type_partner,
+    fetchTopPartner,
+    activeTab,
+  ]);
 
   useEffect(() => {
     fetchTopProduct(
@@ -150,69 +152,81 @@ const DashBoard = () => {
       selectedMonth,
       metric_type_product
     );
-  }, [selectedYear, filterType, selectedMonth, metric_type_product]);
+  }, [
+    selectedYear,
+    filterType,
+    selectedMonth,
+    metric_type_product,
+    fetchTopProduct,
+    activeTab,
+  ]);
 
-  const fetchRevenueData = async (year, filterType, month) => {
-    try {
-      let url = `${API_URL2}/api/admin/dashboard/revenue-summary?year=${year}&filter_type=${filterType}`;
-      if (filterType === "month" && month) {
-        url += `&month=${month}`;
+  const fetchRevenueData = useCallback(
+    async (year, filterType, month) => {
+      try {
+        let url = `${API_URL2}/api/admin/dashboard/revenue-summary?year=${year}&filter_type=${filterType}`;
+        if (filterType === "month" && month) {
+          url += `&month=${month}`;
+        }
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setRevenueData(data.data);
+        } else {
+          console.error("Failed to fetch revenue data");
+        }
+      } catch (error) {
+        console.error("Error fetching revenue data:", error);
       }
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setRevenueData(data.data);
-      } else {
-        console.error("Failed to fetch revenue data");
+    },
+    [cookies.token]
+  );
+  const fetchItemsSoldData = useCallback(
+    async (year, filterType, month) => {
+      try {
+        let url = `${API_URL2}/api/admin/dashboard/itemsold-summary?year=${year}&filter_type=${filterType}`;
+        if (filterType === "month" && month) {
+          url += `&month=${month}`;
+        }
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setItemsSoldData(data.data);
+        } else {
+          console.error("Failed to fetch items sold data");
+        }
+      } catch (error) {
+        console.error("Error fetching items sold data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching revenue data:", error);
-    }
-  };
-  const fetchItemsSoldData = async (year, filterType, month) => {
-    try {
-      let url = `${API_URL2}/api/admin/dashboard/itemsold-summary?year=${year}&filter_type=${filterType}`;
-      if (filterType === "month" && month) {
-        url += `&month=${month}`;
-      }
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setItemsSoldData(data.data);
-      } else {
-        console.error("Failed to fetch items sold data");
-      }
-    } catch (error) {
-      console.error("Error fetching items sold data:", error);
-    }
-  };
-  const fetchData = async (year, filterType, month) => {
-    fetchRevenueData(year, filterType, month);
-    if (activeTab === "itemsSold") {
+    },
+    [cookies.token]
+  );
+  const fetchData = useCallback(
+    async (year, filterType, month) => {
+      fetchRevenueData(year, filterType, month);
       fetchItemsSoldData(year, filterType, month);
-    }
-  };
+    },
+    [fetchItemsSoldData, fetchRevenueData]
+  );
   useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    fetchData(currentYear, filterType);
-  }, [filterType]);
-  // console.log(confirmedOrdersData);
+    fetchData(selectedYear, filterType, selectedMonth);
+  }, [filterType, fetchData, activeTab, selectedYear, selectedMonth]);
   // Tương tự cho các loại đơn hàng khác
-  const handleLoadData = async () => {
+  const handleLoadData = useCallback(async () => {
     const url = new URL(`${API_URL2}/api/admin/dashboard/total-all`);
 
     const response = await fetch(url, {
@@ -233,68 +247,78 @@ const DashBoard = () => {
     } else {
       setErrosMess("Failed to fetch data");
     }
-  };
+  }, [cookies.token]);
 
   useEffect(() => {
-    handleLoadData(); // Call the function when the component mounts
-  }, []);
+    handleLoadData();
+  }, [handleLoadData]);
 
   return (
     <div className="w-full">
-      <div className=" mx-4 flex justify-between h-36 ">
-        <div className="bg-white rounded-lg pl-4 pr-2 pb-4 shadow-md flex items-center">
-          <div className="flex-grow">
-            <p className="text-lg font-semibold text-gray-700 mb-2">
-              Total Depot
-            </p>
-            <h2 className="text-3xl font-bold">{totalDepot}</h2>
-          </div>
-          <div className="ml-6" style={{ width: "100px", height: "5px" }}>
-            <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg pl-4 pr-2 pb-4  shadow-md flex items-center">
-          <div className="flex-grow">
-            <p className="text-lg font-semibold text-gray-700 mb-2">
-              Total Vehicle
-            </p>
-            <h2 className="text-3xl font-bold">{totalVehicle}</h2>
-          </div>
-          <div className="ml-6" style={{ width: "100px", height: "10px" }}>
-            <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+      <div className="mx-4 flex flex-wrap">
+        <div className="w-full md:w-1/5 p-2">
+          <div className="bg-white rounded-lg pl-4 pr-2 pb-4 shadow-md flex flex-col h-full">
+            <div className="flex-grow">
+              <p className="text-lg font-semibold text-gray-700 mb-2">
+                Total Depot
+              </p>
+              <h2 className="text-3xl font-bold">{totalDepot}</h2>
+            </div>
+            <div className="mt-auto">
+              <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+            </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg pl-4 pr-2 pb-4  shadow-md flex items-center">
-          <div className="flex-grow">
-            <p className="text-lg font-semibold text-gray-700 mb-2">
-              Total Partner
-            </p>
-            <h2 className="text-3xl font-bold">{totalPartner}</h2>
-          </div>
-          <div className="ml-6" style={{ width: "100px", height: "10px" }}>
-            <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
-          </div>
-        </div>
-        <div className="bg-white rounded-lg pl-4 pr-2 pb-4  shadow-md flex items-center">
-          <div className="flex-grow">
-            <p className="text-lg font-semibold text-gray-700 mb-2">
-              Total Product
-            </p>
-            <h2 className="text-3xl font-bold">{totalProduct}</h2>
-          </div>
-          <div className="ml-6" style={{ width: "100px", height: "10px" }}>
-            <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+        <div className="w-full md:w-1/5 p-2">
+          <div className="bg-white rounded-lg pl-4 pr-2 pb-4 shadow-md flex flex-col h-full">
+            <div className="flex-grow">
+              <p className="text-lg font-semibold text-gray-700 mb-2">
+                Total Vehicle
+              </p>
+              <h2 className="text-3xl font-bold">{totalVehicle}</h2>
+            </div>
+            <div className="mt-auto">
+              <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+            </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg pl-4 pr-2 pb-4  shadow-md flex items-center">
-          <div className="flex-grow">
-            <p className="text-lg font-semibold text-gray-700 mb-2">
-              Total Order
-            </p>
-            <h2 className="text-3xl font-bold">{totalOrder}</h2>
+        <div className="w-full md:w-1/5 p-2">
+          <div className="bg-white rounded-lg pl-4 pr-2 pb-4 shadow-md flex flex-col h-full">
+            <div className="flex-grow">
+              <p className="text-lg font-semibold text-gray-700 mb-2">
+                Total Partner
+              </p>
+              <h2 className="text-3xl font-bold">{totalPartner}</h2>
+            </div>
+            <div className="mt-auto">
+              <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+            </div>
           </div>
-          <div className="ml-6" style={{ width: "100px", height: "10px" }}>
-            <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+        </div>
+        <div className="w-full md:w-1/5 p-2">
+          <div className="bg-white rounded-lg pl-4 pr-2 pb-4 shadow-md flex flex-col h-full">
+            <div className="flex-grow">
+              <p className="text-lg font-semibold text-gray-700 mb-2">
+                Total Product
+              </p>
+              <h2 className="text-3xl font-bold">{totalProduct}</h2>
+            </div>
+            <div className="mt-auto">
+              <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+            </div>
+          </div>
+        </div>
+        <div className="w-full md:w-1/5 p-2">
+          <div className="bg-white rounded-lg pl-4 pr-2 pb-4 shadow-md flex flex-col h-full">
+            <div className="flex-grow">
+              <p className="text-lg font-semibold text-gray-700 mb-2">
+                Total Order
+              </p>
+              <h2 className="text-3xl font-bold">{totalOrder}</h2>
+            </div>
+            <div className="mt-auto">
+              <MiniLineChart data={confirmedOrdersData} color="#4caf50" />
+            </div>
           </div>
         </div>
       </div>
@@ -454,116 +478,140 @@ const DashBoard = () => {
       {/* Thay đổi kiểu chữ và màu sắc của tiêu đề và tab */}
       <div className="mt-4 mx-4 flex gap-5">
         <div className="flex-1">
-          <div className="flex bg-indigo-200 justify-between rounded-t-lg">
-            <div className=" py-2 px-2 text-lg font-semibold text-gray-800 ">
-              Top Partners
-            </div>
-            <div className=" py-2 px-2 flex items-baseline">
-              <div
-                className={`mb-0 px-4 py-1 border border-gray-400 rounded-tl-lg rounded-bl-lg cursor-pointer ${
-                  metric_type_partner === "amount"
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-700 font-semibold"
-                }`}
-                onClick={() => handleMetricPartnerTypeChange("amount")}
-              >
-                Amount
+          <div className="bg-white rounded-lg pb-2 shadow-md">
+            <div className="flex justify-between items-center rounded-t-lg py-2 px-4">
+              <p className="text-lg font-semibold text-gray-800">
+                Top Partners
+              </p>
+              <div className="flex items-center">
+                <div
+                  className={`px-4 py-2 border border-gray-400 cursor-pointer ${
+                    metric_type_partner === "amount"
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-700 font-semibold"
+                  }`}
+                  onClick={() => handleMetricPartnerTypeChange("amount")}
+                >
+                  Amount
+                </div>
+                <div
+                  className={`px-4 py-2 border border-gray-400 cursor-pointer ${
+                    metric_type_partner === "revenue"
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-700 font-semibold"
+                  }`}
+                  onClick={() => handleMetricPartnerTypeChange("revenue")}
+                >
+                  Revenue
+                </div>
               </div>
-              <div
-                className={`mb-0 px-4 py-1 border border-gray-400 cursor-pointer ${
-                  metric_type_partner === "revenue"
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-700 font-semibold"
-                }`}
-                onClick={() => handleMetricPartnerTypeChange("revenue")}
-              >
-                Revenue
-              </div>
             </div>
-          </div>
-          <div className="bg-white p-4">
-            <table className="w-full text-sm text-left text-gray-500">
-              {/* <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3">
-                    Partner ID
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Partner Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    {metric_type === "amount"
-                      ? "Total Amount"
-                      : "Total Revenue"}
-                  </th>
-                </tr>
-              </thead> */}
-              <tbody>
-                {TopPartnerData.map((partner) => (
-                  <tr key={partner.partner_id} className="bg-white border-b">
-                    <td className="px-6 py-4">{partner.partner_id}</td>
-                    <td className="px-6 py-4">{partner.partner_name}</td>
-                    <td className="px-6 py-4">{parseFloat(partner.total)}</td>
+            <div className="overflow-y-auto h-96">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700">
+                    <th className="py-2 px-4 font-semibold">#</th>
+                    <th className="py-2 px-4 font-semibold">Partner Name</th>
+                    <th className="py-2 px-4 font-semibold">
+                      {metric_type_partner === "amount"
+                        ? "Total Revenue"
+                        : "Total Sale"}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {TopPartnerData.map((partner, idx) => (
+                    <tr
+                      key={partner.partner_id}
+                      className="border-b border-gray-200"
+                    >
+                      <td className="py-2 px-4 text-gray-700 font-semibold">
+                        {idx + 1}
+                      </td>
+                      <td className="py-2 px-4 text-gray-700">
+                        {partner.partner_name}
+                      </td>
+                      <td className="py-2 px-4 text-gray-700 font-semibold">
+                        {partner.total
+                          ? parseFloat(partner.total).toLocaleString("en-US", {
+                              maximumSignificantDigits: 20,
+                            })
+                          : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-        {/* ... */}
+
         <div className="flex-1">
-          <div className="flex bg-indigo-200 justify-between rounded-t-lg">
-            <div className=" py-2 px-2 text-lg font-semibold text-gray-800 ">
-              Top Products
-            </div>
-            <div className=" py-2 px-2 flex items-baseline">
-              <div
-                className={`mb-0 px-4 py-1 border border-gray-400 rounded-tl-lg rounded-bl-lg cursor-pointer ${
-                  metric_type_partner === "quantity"
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-700 font-semibold"
-                }`}
-                onClick={() => handleMetricProductTypeChange("quantity")}
-              >
-                Quantity
+          <div className="bg-white rounded-lg pb-2 shadow-md">
+            <div className="flex justify-between items-center rounded-t-lg py-2 px-4">
+              <p className="text-lg font-semibold text-gray-800">
+                Top Products
+              </p>
+              <div className="flex items-center">
+                <div
+                  className={`px-4 py-2 border border-gray-400 cursor-pointer ${
+                    metric_type_product === "quantity"
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-700 font-semibold"
+                  }`}
+                  onClick={() => handleMetricProductTypeChange("quantity")}
+                >
+                  Quantity
+                </div>
+                <div
+                  className={`px-4 py-2 border border-gray-400 cursor-pointer ${
+                    metric_type_product === "sale"
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-700 font-semibold"
+                  }`}
+                  onClick={() => handleMetricProductTypeChange("sale")}
+                >
+                  Sale
+                </div>
               </div>
-              <div
-                className={`mb-0 px-4 py-1 border border-gray-400 cursor-pointer ${
-                  metric_type_partner === "sale"
-                    ? "bg-indigo-600 text-white"
-                    : "text-gray-700 font-semibold"
-                }`}
-                onClick={() => handleMetricProductTypeChange("sale")}
-              >
-                Sale
-              </div>
             </div>
-          </div>
-          <div className="bg-white p-4">
-            <table className="w-full text-sm text-left text-gray-500">
-              {/* <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3">
-                    Product ID
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Product Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Total Revenue
-                  </th>
-                </tr>
-              </thead> */}
-              <tbody>
-                {TopProductData.map((product) => (
-                  <tr key={product.product_id} className="bg-white border-b">
-                    <td className="px-6 py-4">{product.product_id}</td>
-                    <td className="px-6 py-4">{product.product_name}</td>
-                    <td className="px-6 py-4">{parseFloat(product.total)}</td>
+            <div className="overflow-y-auto h-96">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700">
+                    <th className="py-2 px-4 font-semibold">#</th>
+                    <th className="py-2 px-4 font-semibold">Product Name</th>
+                    <th className="py-2 px-4 font-semibold">
+                      {metric_type_product === "quantity"
+                        ? "Total Quantity"
+                        : "Total Sale"}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {TopProductData.map((product, idx) => (
+                    <tr
+                      key={product.product_id}
+                      className="border-b border-gray-200"
+                    >
+                      <td className="py-2 px-4 text-gray-700 font-semibold">
+                        {idx + 1}
+                      </td>
+                      <td className="py-2 px-4 text-gray-700">
+                        {product.product_name}
+                      </td>
+                      <td className="py-2 px-4 text-gray-700 font-semibold">
+                        {product.total
+                          ? parseFloat(product.total).toLocaleString("en-US", {
+                              maximumSignificantDigits: 20,
+                            })
+                          : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

@@ -3,19 +3,19 @@ import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 
-function AddPartnerForm({ onClose, onPartnerAdded }) {
+function AddVehicleForm({ onClose, onVehicleAdded }) {
   const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [discount, setDiscount] = useState(10);
-  const [gender, setGender] = useState("");
+  const [capacity, setCapacity] = useState("");
+  const [speed, setSpeed] = useState("");
+  const [fuel_consumption, setFuelConsumption] = useState("");
+  const [fuel_cost, setFuelCost] = useState("");
+  const [total_vehicles, setTotalVehicle] = useState("");
   const [cookies] = useCookies(["token"]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/api/admin/partner`, {
+      const response = await fetch(`${API_URL2}/api/admin/vehicle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -24,19 +24,19 @@ function AddPartnerForm({ onClose, onPartnerAdded }) {
         },
         body: JSON.stringify({
           name,
-          address,
-          phone,
-          date_of_birth: dateOfBirth,
-          discount,
-          gender,
+          capacity,
+          speed,
+          fuel_consumption,
+          fuel_cost,
+          total_vehicles,
         }),
       });
       if (response.status === 200) {
-        toast.success("Partner added successfully");
-        onPartnerAdded();
+        toast.success("Vehicle added successfully");
+        onVehicleAdded();
         onClose();
       } else {
-        throw new Error("Failed to add partner");
+        throw new Error("Failed to add vehicle");
       }
     } catch (error) {
       toast.error("Error: " + error.message);
@@ -45,7 +45,7 @@ function AddPartnerForm({ onClose, onPartnerAdded }) {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Add Partner</h2>
+      <h2 className="text-xl font-bold mb-4">Add Vehicle</h2>
       <form onSubmit={handleSubmit}>
         <div className="flex mb-4">
           <div className="w-1/2 mr-2">
@@ -62,77 +62,73 @@ function AddPartnerForm({ onClose, onPartnerAdded }) {
             />
           </div>
           <div className="w-1/2 ml-2">
-            <label htmlFor="address" className="block mb-1">
-              Address
-            </label>
-            <input
-              type="text"
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="border border-gray-300 p-2 rounded w-full"
-              required
-            />
-          </div>
-        </div>
-        <div className="flex mb-4">
-          <div className="w-1/2 mr-2">
-            <label htmlFor="phone" className="block mb-1">
-              Phone
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="border border-gray-300 p-2 rounded w-full"
-              required
-            />
-          </div>
-          <div className="w-1/2 ml-2">
-            <label htmlFor="dateOfBirth" className="block mb-1">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              id="dateOfBirth"
-              value={dateOfBirth}
-              onChange={(e) => setDateOfBirth(e.target.value)}
-              className="border border-gray-300 p-2 rounded w-full"
-              required
-            />
-          </div>
-        </div>
-        <div className="flex mb-4">
-          <div className="w-1/2 mr-2">
-            <label htmlFor="discount" className="block mb-1">
-              Discount (%)
+            <label htmlFor="total_vehicles" className="block mb-1">
+              Total Vehicles
             </label>
             <input
               type="number"
-              id="discount"
-              value={discount}
-              onChange={(e) => setDiscount(e.target.value)}
+              id="total_vehicles"
+              value={total_vehicles}
+              onChange={(e) => setTotalVehicle(e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
+              required
+            />
+          </div>
+        </div>
+        <div className="flex mb-4">
+          <div className="w-1/2 mr-2">
+            <label htmlFor="capacity" className="block mb-1">
+              Capacity
+            </label>
+            <input
+              type="number"
+              id="capacity"
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
               className="border border-gray-300 p-2 rounded w-full"
               required
             />
           </div>
           <div className="w-1/2 ml-2">
-            <label htmlFor="gender" className="block mb-1">
-              Gender
+            <label htmlFor="speed" className="block mb-1">
+              Speed
             </label>
-            <select
-              id="gender"
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
+            <input
+              type="number"
+              id="speed"
+              value={speed}
+              onChange={(e) => setSpeed(e.target.value)}
               className="border border-gray-300 p-2 rounded w-full"
               required
-            >
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
+            />
+          </div>
+        </div>
+        <div className="flex mb-4">
+          <div className="w-1/2 mr-2">
+            <label htmlFor="fuel_consumption" className="block mb-1">
+              Fuel Consumption
+            </label>
+            <input
+              type="number"
+              id="fuel_consumption"
+              value={fuel_consumption}
+              onChange={(e) => setFuelConsumption(e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
+              required
+            />
+          </div>
+          <div className="w-1/2 ml-2">
+            <label htmlFor="fuel_cost" className="block mb-1">
+              Fuel Cost
+            </label>
+            <input
+              type="number"
+              id="fuel_cost"
+              value={fuel_cost}
+              onChange={(e) => setFuelCost(e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
+              required
+            />
           </div>
         </div>
         <div className="flex justify-end mt-4">
@@ -147,7 +143,7 @@ function AddPartnerForm({ onClose, onPartnerAdded }) {
             type="submit"
             className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600"
           >
-            Add Partner
+            Add Vehicle
           </button>
         </div>
       </form>
@@ -155,4 +151,4 @@ function AddPartnerForm({ onClose, onPartnerAdded }) {
   );
 }
 
-export default AddPartnerForm;
+export default AddVehicleForm;

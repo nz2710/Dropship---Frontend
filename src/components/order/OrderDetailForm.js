@@ -12,7 +12,6 @@ function OrderDetailForm({
   onClose,
   onPageChange,
 }) {
-
   return (
     <div className="p-2">
       <h2 className="text-xl font-bold mb-3">Order Details</h2>
@@ -32,8 +31,14 @@ function OrderDetailForm({
           {/* )} */}
         </div>
         <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Price</label>
-          <p>{order.price}</p>
+          <label className="block mb-1 font-bold">Price (VND)</label>
+          <p>
+            {order.order.price
+              ? parseFloat(order.order.price).toLocaleString("en-US", {
+                  maximumSignificantDigits: 20,
+                })
+              : ""}
+          </p>
         </div>
       </div>
       <div className="flex">
@@ -51,7 +56,7 @@ function OrderDetailForm({
           {/* )} */}
         </div>
         <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Discount</label>
+          <label className="block mb-1 font-bold">Discount (%)</label>
           {/* {isEditing ? (
             <select
               name="status"
@@ -63,7 +68,7 @@ function OrderDetailForm({
               <option value="inactive">Inactive</option>
             </select>
           ) : ( */}
-          <p>{order.order.discount}</p>
+          <p>{parseFloat(order.order.discount)}</p>
 
           {/* <p
               className={
@@ -107,7 +112,7 @@ function OrderDetailForm({
       </div>
       <div className="flex">
         <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">address</label>
+          <label className="block mb-1 font-bold">Address</label>
           {/* {isEditing ? (
             <input
               type="number"
@@ -122,14 +127,14 @@ function OrderDetailForm({
         </div>
         <div className="w-1/2 ml-2">
           <label className="block mb-1 font-bold">Status</label>
-          <p
-            className={
-              order.order.status === "success"
-                ? "text-green-500"
-                : "text-red-500"
-            }
-          >
-            {order.order.status === "success" ? "Success" : "Pending"}
+          <p>
+            {order.order.status === "Success" ? (
+              <span className="text-green-500">Success</span>
+            ) : order.order.status === "Delivery" ? (
+              <span className="text-yellow-500">Delivery</span>
+            ) : (
+              <span className="text-red-500">Pending</span>
+            )}
           </p>
           {/* {isEditing && (
             <input
@@ -144,23 +149,23 @@ function OrderDetailForm({
       <div className="flex">
         <div className="w-1/2 mr-2">
           <label className="block mb-1 font-bold">Longitude</label>
-          <p>{parseFloat(order.order.longitude)}</p>{" "}
+          <p>{parseFloat(order.order.longitude)}</p>
           {/* Sử dụng parseFloat để loại bỏ các số 0 thừa */}
         </div>
         <div className="w-1/2 ml-2">
           <label className="block mb-1 font-bold">Latitude</label>
-          <p>{parseFloat(order.order.latitude)}</p>{" "}
+          <p>{parseFloat(order.order.latitude)}</p>
           {/* Sử dụng parseFloat để loại bỏ các số 0 thừa */}
         </div>
       </div>
 
       <div className="flex">
         <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Weight</label>
-          <p>{order.order.mass_of_order}</p>
+          <label className="block mb-1 font-bold">Weight (kg)</label>
+          <p>{parseFloat(order.order.mass_of_order)}</p>
         </div>
         <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Time Service</label>
+          <label className="block mb-1 font-bold">Time Service (minutes)</label>
           <p>{order.order.time_service}</p>
         </div>
       </div>
@@ -183,8 +188,8 @@ function OrderDetailForm({
             <th className="border px-4 py-2">ID</th>
             <th className="border px-4 py-2">Name</th>
             <th className="border px-4 py-2">SKU</th>
-            <th className="border px-4 py-2">Price</th>
-            <th className="border px-4 py-2">Cost</th>
+            <th className="border px-4 py-2">Price (VND)</th>
+            <th className="border px-4 py-2">Cost (VND)</th>
             <th className="border px-4 py-2">Quantity</th>
             <th className="border px-4 py-2">Image</th>
             <th className="border px-4 py-2">Status</th>
@@ -196,34 +201,53 @@ function OrderDetailForm({
               <td className="border px-4 py-2">{product.id}</td>
               <td className="border px-4 py-2">{product.name}</td>
               <td className="border px-4 py-2">{product.sku}</td>
-              <td className="border px-4 py-2">{product.price}</td>
-              <td className="border px-4 py-2">{product.cost}</td>
+              <td className="border px-4 py-2">
+                {product.price
+                  ? parseFloat(product.price).toLocaleString("en-US", {
+                      maximumSignificantDigits: 20,
+                    })
+                  : ""}
+              </td>
+              <td className="border px-4 py-2">
+                {product.cost
+                  ? parseFloat(product.cost).toLocaleString("en-US", {
+                      maximumSignificantDigits: 20,
+                    })
+                  : ""}
+              </td>
               <td className="border px-4 py-2">{product.quantity}</td>
               <td className="border px-4 py-2">
-                {" "}
                 <img
                   src={`${API_URL2}/images/products/${product.image}`}
                   alt={product.name}
                   className="w-20 h-20 object-cover"
                 />
               </td>
-              <td className="border px-4 py-2">{product.status}</td>
+              <td className="border px-4 py-2">
+                {product.status === "Active" ? (
+                  <span className="text-green-500">Active</span>
+                ) : (
+                  <span className="text-red-500">Inactive</span>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <ReactPaginate
-        previousLabel={"Previous"}
-        nextLabel={"Next"}
-        pageCount={pageCount}
-        onPageChange={onPageChange}
-        containerClassName={"pagination"}
-        previousLinkClassName={"pagination__link"}
-        nextLinkClassName={"pagination__link"}
-        disabledClassName={"pagination__link--disabled"}
-        activeClassName={"pagination__link--active"}
-        forcePage={currentPage - 1}
-      />
+      {pageCount > 0 && (
+        <ReactPaginate
+          previousLabel={"Previous"}
+          nextLabel={"Next"}
+          pageCount={pageCount}
+          onPageChange={onPageChange}
+          containerClassName={"pagination"}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
+          forcePage={currentPage - 1}
+        />
+      )}
       <div className="flex justify-end">
         {/* {isEditing ? (
           <>

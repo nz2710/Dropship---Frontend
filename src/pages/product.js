@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ReactPaginate from "react-paginate";
 import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
@@ -13,7 +13,6 @@ function Product() {
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPageData, setCurrentPageData] = useState([]);
-  // const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -27,7 +26,7 @@ function Product() {
     handleLoadData(selectedPage + 1);
   };
 
-  const handleLoadData = async (page = currentPage) => {
+  const handleLoadData = useCallback(async (page = currentPage) => {
     const url = new URL(`${API_URL2}/api/admin/product`);
     url.searchParams.append("pageSize", dataPerPage);
     url.searchParams.append("order_by", orderBy);
@@ -60,11 +59,11 @@ function Product() {
     } else {
       console.log("Fail", response);
     }
-  };
+  }, [cookies.token, currentPage, dataPerPage, orderBy, searchTerm, searchType, sortBy]);
 
   useEffect(() => {
     handleLoadData();
-  }, [currentPage, searchType, searchTerm, orderBy, sortBy]);
+  }, [currentPage, searchType, searchTerm, orderBy, sortBy, handleLoadData]);
 
   const handleAddProduct = () => {
     setShowAddForm(true);
@@ -215,7 +214,8 @@ function Product() {
 
               {/* ... */}
             </div>
-            <table className="min-w-full">
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-fixed">
               <thead>
                 <tr>
                   <th
@@ -242,7 +242,7 @@ function Product() {
                     )}`}
                     onClick={() => handleSort("price")}
                   >
-                    Price
+                    Price (VND)
                   </th>
                   <th
                     className={`border px-4 py-2 cursor-pointer ${getSortIcon(
@@ -250,7 +250,7 @@ function Product() {
                     )}`}
                     onClick={() => handleSort("cost")}
                   >
-                    Cost
+                    Cost (VND)
                   </th>
                   <th
                     className={`border px-4 py-2 cursor-pointer ${getSortIcon(
@@ -260,7 +260,7 @@ function Product() {
                   >
                     Quantity
                   </th>
-                  <th className="border px-4 py-2 ">Image</th>
+                  <th className="border px-4 py-2">Image</th>
                   <th className="border px-4 py-2">Status</th>
                   <th className="border px-4 py-2">Operation</th>
                 </tr>
@@ -273,20 +273,16 @@ function Product() {
                     <td className="border px-4 py-2">{item.sku}</td>
                     <td className="border px-4 py-2">{item.description}</td>
                     <td className="border px-4 py-2">
-                      {" "}
-                      {item.price
-                        ? parseFloat(item.price).toLocaleString("vi-VN", {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
+                    {item.price
+                        ? parseFloat(item.price).toLocaleString("en-US", {
+                            maximumSignificantDigits: 20,
                           })
                         : ""}
                     </td>
                     <td className="border px-4 py-2">
-                      {" "}
-                      {item.cost
-                        ? parseFloat(item.cost).toLocaleString("vi-VN", {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
+                    {item.cost
+                        ? parseFloat(item.cost).toLocaleString("en-US", {
+                            maximumSignificantDigits: 20,
                           })
                         : ""}
                     </td>
@@ -299,13 +295,13 @@ function Product() {
                       />
                     </td>
                     <td className="border px-4 py-2">
-                      {item.status === "active" ? (
+                      {item.status === "Active" ? (
                         <span className="text-green-500">Active</span>
                       ) : (
                         <span className="text-red-500">Inactive</span>
                       )}
                     </td>
-                    <td className="border px-4 py-2">
+                    <td className="border px-1 py-2">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleShowDetail(item)}
@@ -325,6 +321,8 @@ function Product() {
                 ))}
               </tbody>
             </table>
+            </div>
+            {pageCount > 0 && (
             <ReactPaginate
               previousLabel={"Previous"}
               nextLabel={"Next"}
@@ -337,6 +335,7 @@ function Product() {
               activeClassName={"pagination__link--active"}
               forcePage={currentPage - 1}
             />
+            )}
           </>
         ) : showAddForm ? (
           <AddProductForm

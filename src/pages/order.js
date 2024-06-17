@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ReactPaginate from "react-paginate";
 import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
@@ -42,46 +42,59 @@ function OrderPage() {
     handleLoadData(selectedPage + 1);
   };
 
-  const handleLoadData = async (page = currentPage) => {
-    const url = new URL(`${API_URL2}/api/admin/order`);
-    url.searchParams.append("pageSize", dataPerPage);
-    url.searchParams.append("order_by", orderBy);
-    url.searchParams.append("sort_by", sortBy);
-    url.searchParams.append("page", page);
+  const handleLoadData = useCallback(
+    async (page = currentPage) => {
+      const url = new URL(`${API_URL2}/api/admin/order`);
+      url.searchParams.append("pageSize", dataPerPage);
+      url.searchParams.append("order_by", orderBy);
+      url.searchParams.append("sort_by", sortBy);
+      url.searchParams.append("page", page);
 
-    if (searchType === "customer_name") {
-      url.searchParams.append("customer_name", searchTerm);
-    } else if (searchType === "address") {
-      url.searchParams.append("address", searchTerm);
-    } else if (searchType === "phone") {
-      url.searchParams.append("phone", searchTerm);
-    } else if (searchType === "partner_name") {
-      url.searchParams.append("partner_name", searchTerm);
-    } else if (searchType === "status") {
-      url.searchParams.append("status", searchTerm);
-    }
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    });
-    if (response.status === 200) {
-      const body = (await response.json()).data;
-      setCurrentPageData(body.data);
-      setPageCount(body.last_page);
-      if (body.data.length === 0 && page > 1) {
-        setCurrentPage(page - 1);
-      } else {
-        setCurrentPage(page);
+      if (searchType === "customer_name") {
+        url.searchParams.append("customer_name", searchTerm);
+      } else if (searchType === "address") {
+        url.searchParams.append("address", searchTerm);
+      } else if (searchType === "phone") {
+        url.searchParams.append("phone", searchTerm);
+      } else if (searchType === "partner_name") {
+        url.searchParams.append("partner_name", searchTerm);
+      } else if (searchType === "status") {
+        url.searchParams.append("status", searchTerm);
+      } else if (searchType === "code_order") {
+        url.searchParams.append("code_order", searchTerm);
       }
-    } else {
-      console.log("Fail", response);
-    }
-  };
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      });
+      if (response.status === 200) {
+        const body = (await response.json()).data;
+        setCurrentPageData(body.data);
+        setPageCount(body.last_page);
+        if (body.data.length === 0 && page > 1) {
+          setCurrentPage(page - 1);
+        } else {
+          setCurrentPage(page);
+        }
+      } else {
+        console.log("Fail", response);
+      }
+    },
+    [
+      cookies.token,
+      currentPage,
+      dataPerPage,
+      orderBy,
+      searchTerm,
+      searchType,
+      sortBy,
+    ]
+  );
 
   const handleSort = (column) => {
     if (orderBy === column) {
@@ -182,7 +195,7 @@ function OrderPage() {
 
   useEffect(() => {
     handleLoadData();
-  }, [currentPage, searchType, searchTerm, orderBy, sortBy]);
+  }, [currentPage, searchType, searchTerm, orderBy, sortBy, handleLoadData]);
 
   return (
     <div className="flex justify-center bg-white p-3 m-3 rounded-md">
@@ -210,6 +223,7 @@ function OrderPage() {
                   className="border border-gray-300 p-2 rounded-md mr-2"
                 >
                   <option value="customer_name">Customer Name</option>
+                  <option value="code_order">Code Order</option>
                   <option value="partner_name">Partner Name</option>
                   <option value="address">Address</option>
                   <option value="phone">Phone</option>
@@ -226,6 +240,8 @@ function OrderPage() {
                       ? "Phone"
                       : searchType === "partner_name"
                       ? "Partner Name"
+                      : searchType === "code_order"
+                      ? "Code Order"
                       : "Status"
                   }`}
                   value={searchTerm}
@@ -243,138 +259,133 @@ function OrderPage() {
               </div>
               {/* ... */}
             </div>
-            <table className="min-w-full">
-              <thead>
-                <tr>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
-                      "id"
-                    )}`}
-                    onClick={() => handleSort("id")}
-                  >
-                    ID
-                  </th>
-                  <th className="border px-4 py-2" style={{ width: "10%" }}>
-                    Partner
-                  </th>
-                  <th className="border px-4 py-2" style={{ width: "25%" }}>
-                    Code Order
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer style={{ width: "10%" }} ${getSortIcon(
-                      "customer_name"
-                    )}`}
-                    onClick={() => handleSort("customer_name")}
-                  >
-                    Customer
-                  </th>
-                  {/* <th className="border px-4 py-2" style={{ width: "7%" }}>
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-fixed">
+                <thead>
+                  <tr>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer  ${getSortIcon(
+                        "id"
+                      )}`}
+                      onClick={() => handleSort("id")}
+                    >
+                      ID
+                    </th>
+                    <th className="border px-4 py-2">Partner</th>
+                    <th className="border px-4 py-2">Code Order</th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "customer_name"
+                      )}`}
+                      onClick={() => handleSort("customer_name")}
+                    >
+                      Customer
+                    </th>
+                    {/* <th className="border px-4 py-2" style={{ width: "7%" }}>
                     Phone
                   </th> */}
-                  <th className="border px-4 py-2" style={{ width: "30%" }}>
-                    Address
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
-                      "price"
-                    )}`}
-                    onClick={() => handleSort("price")}
-                  >
-                    Price
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
-                      "mass_of_order"
-                    )}`}
-                    onClick={() => handleSort("mass_of_order")}
-                  >
-                    Weight
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer style={{ width: "5%" }} ${getSortIcon(
-                      "time_service"
-                    )}`}
-                    onClick={() => handleSort("time_service")}
-                  >
-                    Time Service
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer style={{ width: "7%" }} ${getSortIcon(
-                      "status"
-                    )}`}
-                    onClick={() => handleSort("status")}
-                  >
-                    Status
-                  </th>
-                  <th className="border px-4 py-2" style={{ width: "7%" }}>
-                    Operation
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPageData.map((item) => (
-                  <tr key={item.id}>
-                    <td className="border px-4 py-2">{item.id}</td>
-                    <td className="border px-4 py-2">
-                      {item.partner?.name ?? "No Partner"}
-                    </td>
-                    <td className="border px-4 py-2">{item.code_order}</td>
-                    <td className="border px-4 py-2">{item.customer_name}</td>
-                    {/* <td className="border px-4 py-2">{item.phone}</td> */}
-                    <td className="border px-4 py-2">{item.address}</td>
-                    <td className="border px-4 py-2">
-                      {item.price
-                        ? parseFloat(item.price).toLocaleString("vi-VN", {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 0,
-                          })
-                        : ""}
-                    </td>
-                    <td className="border px-4 py-2">
-                      {parseFloat(item.mass_of_order)}
-                    </td>
-                    <td className="border px-4 py-2">{item.time_service}</td>
-                    <td className="border px-4 py-2">
-                      {item.status === "success" ? (
-                        <span className="text-green-500">Success</span>
-                      ) : item.status === "delivery" ? (
-                        <span className="text-yellow-500">Delivery</span>
-                      ) : (
-                        <span className="text-red-500">Pending</span>
-                      )}
-                    </td>
-                    <td className="border px-4 py-2">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleShowDetail(item)}
-                          className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
-                        >
-                          Detail
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item)}
-                          className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-800"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
+                    <th className="border px-4 py-2">Address</th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "price"
+                      )}`}
+                      onClick={() => handleSort("price")}
+                    >
+                      Price (VND)
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "mass_of_order"
+                      )}`}
+                      onClick={() => handleSort("mass_of_order")}
+                    >
+                      Weight (kg)
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "time_service"
+                      )}`}
+                      onClick={() => handleSort("time_service")}
+                    >
+                      Time Service (minutes)
+                    </th>
+                    <th
+                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
+                        "status"
+                      )}`}
+                      onClick={() => handleSort("status")}
+                    >
+                      Status
+                    </th>
+                    <th className="border px-4 py-2">Operation</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <ReactPaginate
-              previousLabel={"Previous"}
-              nextLabel={"Next"}
-              pageCount={pageCount}
-              onPageChange={handlePageChange}
-              containerClassName={"pagination"}
-              previousLinkClassName={"pagination__link"}
-              nextLinkClassName={"pagination__link"}
-              disabledClassName={"pagination__link--disabled"}
-              activeClassName={"pagination__link--active"}
-              forcePage={currentPage - 1}
-            />
+                </thead>
+                <tbody>
+                  {currentPageData.map((item) => (
+                    <tr key={item.id}>
+                      <td className="border px-4 py-2">{item.id}</td>
+                      <td className="border px-4 py-2">
+                        {item.partner?.name ?? "No Partner"}
+                      </td>
+                      <td className="border px-4 py-2">{item.code_order}</td>
+                      <td className="border px-4 py-2">{item.customer_name}</td>
+                      {/* <td className="border px-4 py-2">{item.phone}</td> */}
+                      <td className="border px-4 py-2">{item.address}</td>
+                      <td className="border px-4 py-2">
+                        {item.price
+                          ? parseFloat(item.price).toLocaleString("en-US", {
+                              maximumSignificantDigits: 20,
+                            })
+                          : ""}
+                      </td>
+                      <td className="border px-4 py-2">
+                        {parseFloat(item.mass_of_order)}
+                      </td>
+                      <td className="border px-4 py-2">{item.time_service}</td>
+                      <td className="border px-4 py-2">
+                        {item.status === "Success" ? (
+                          <span className="text-green-500">Success</span>
+                        ) : item.status === "Delivery" ? (
+                          <span className="text-yellow-500">Delivery</span>
+                        ) : (
+                          <span className="text-red-500">Pending</span>
+                        )}
+                      </td>
+                      <td className="border px-1 py-2">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleShowDetail(item)}
+                            className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
+                          >
+                            Detail
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item)}
+                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-800"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {pageCount > 0 && (
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                pageCount={pageCount}
+                onPageChange={handlePageChange}
+                containerClassName={"pagination"}
+                previousLinkClassName={"pagination__link"}
+                nextLinkClassName={"pagination__link"}
+                disabledClassName={"pagination__link--disabled"}
+                activeClassName={"pagination__link--active"}
+                forcePage={currentPage - 1}
+              />
+            )}
           </>
         ) : showAddForm ? (
           <AddOrderForm
