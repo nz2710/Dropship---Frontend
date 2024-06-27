@@ -22,19 +22,31 @@ import avatar8 from './../../assets/images/avatars/8.jpg'
 
 const AppHeaderDropdown = () => {
   const navigate = useNavigate();
-  const [cookies, removeCookie] = useCookies(["token"]);
+  const [cookies, removeCookie] = useCookies(["token", "user"]);
+
   const logout = async () => {
     try {
-      await fetch(`${API_URL}/api/logout`, {
+      const response = await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${cookies.token}`,
         },
       });
-      removeCookie(['token']);
-      navigate("/");
+
+      if (response.ok) {
+        // Remove both token and user cookies
+        removeCookie('token', { path: '/' });
+        removeCookie('user', { path: '/' });
+        navigate("/");
+      } else {
+        // If the server response is not OK, throw an error
+        throw new Error('Logout failed on server');
+      }
     } catch (error) {
-      // Handle error
+      console.error('Logout error:', error);
+      // You can add user-facing error handling here
+      // For example, showing a toast notification
+      // toast.error("Logout failed. Please try again.");
     }
   };
   return (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactPaginate from "react-paginate";
 import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
@@ -6,6 +6,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddOrderForm from "../components/order/AddOrderForm";
 import OrderDetailForm from "../components/order/OrderDetailForm";
+import {
+  getSortIcon,
+  handleSort,
+  handleDelete,
+  formatNumber,
+} from "../utils/commonUtils";
+import { useTableDragScroll } from "../hooks/useTableDragScroll";
 
 function OrderPage() {
   const [orderBy, setOrderBy] = useState("id");
@@ -22,8 +29,11 @@ function OrderPage() {
   const [selectedOrderProducts, setSelectedOrderProducts] = useState(null);
   const dataPerPage = 10;
   const [cookies] = useCookies(["token"]);
-
   const [showAddForm, setShowAddForm] = useState(false);
+
+  const tableRef = useRef(null);
+  const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } =
+    useTableDragScroll(tableRef);
 
   const handleAddOrder = () => {
     setShowAddForm(true);
@@ -50,39 +60,29 @@ function OrderPage() {
       url.searchParams.append("sort_by", sortBy);
       url.searchParams.append("page", page);
 
-      if (searchType === "customer_name") {
-        url.searchParams.append("customer_name", searchTerm);
-      } else if (searchType === "address") {
-        url.searchParams.append("address", searchTerm);
-      } else if (searchType === "phone") {
-        url.searchParams.append("phone", searchTerm);
-      } else if (searchType === "partner_name") {
-        url.searchParams.append("partner_name", searchTerm);
-      } else if (searchType === "status") {
-        url.searchParams.append("status", searchTerm);
-      } else if (searchType === "code_order") {
-        url.searchParams.append("code_order", searchTerm);
+      if (searchTerm) {
+        url.searchParams.append(searchType, searchTerm);
       }
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      if (response.status === 200) {
-        const body = (await response.json()).data;
-        setCurrentPageData(body.data);
-        setPageCount(body.last_page);
-        if (body.data.length === 0 && page > 1) {
-          setCurrentPage(page - 1);
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        if (response.status === 200) {
+          const body = (await response.json()).data;
+          setCurrentPageData(body.data);
+          setPageCount(body.last_page);
+          setCurrentPage(body.data.length === 0 && page > 1 ? page - 1 : page);
         } else {
-          setCurrentPage(page);
+          throw new Error("Failed to fetch data");
         }
-      } else {
-        console.log("Fail", response);
+      } catch (error) {
+        toast.error("Error: " + error.message);
       }
     },
     [
@@ -95,42 +95,6 @@ function OrderPage() {
       sortBy,
     ]
   );
-
-  const handleSort = (column) => {
-    if (orderBy === column) {
-      setSortBy(sortBy === "asc" ? "desc" : "asc");
-    } else {
-      setOrderBy(column);
-      setSortBy("asc");
-    }
-  };
-  const getSortIcon = (column) => {
-    if (orderBy === column) {
-      return sortBy === "asc" ? "sort-asc" : "sort-desc";
-    }
-    return "";
-  };
-
-  const handleDelete = async (item) => {
-    try {
-      const response = await fetch(`${API_URL2}/api/admin/order/${item.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      if (response.status === 200) {
-        toast.success("Item successfully deleted.");
-        handleLoadData(currentPage);
-      } else {
-        throw new Error("Failed to delete item");
-      }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
-  };
 
   const handleShowDetail = async (item) => {
     try {
@@ -197,6 +161,136 @@ function OrderPage() {
     handleLoadData();
   }, [currentPage, searchType, searchTerm, orderBy, sortBy, handleLoadData]);
 
+  const renderTableHeader = () => (
+    <tr>
+      {[
+        { label: "ID", key: "id" },
+        { label: "Partner", key: null },
+        { label: "Code Order", key: null },
+        { label: "Customer", key: "customer_name" },
+        { label: "Address", key: null },
+        { label: "Price (VND)", key: "price" },
+        { label: "Weight (kg)", key: "mass_of_order" },
+        { label: "Time Service (minutes)", key: "time_service" },
+        { label: "Status", key: "status" },
+        { label: "Operation", key: null },
+      ].map((column, index) => (
+        <th
+          key={column.label}
+          className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+            column.key ? "cursor-pointer" : ""
+          } ${index !== 9 ? "border-r border-gray-200" : ""}`}
+          onClick={() =>
+            column.key &&
+            handleSort(column.key, orderBy, sortBy, setOrderBy, setSortBy)
+          }
+        >
+          <div className="flex items-center">
+            <span>{column.label}</span>
+            {column.key && (
+              <span className="ml-1">
+                {getSortIcon(column.key, orderBy, sortBy)}
+              </span>
+            )}
+          </div>
+        </th>
+      ))}
+    </tr>
+  );
+
+  const renderTableBody = () =>
+    currentPageData.map((item) => (
+      <tr key={item.id} className="hover:bg-gray-50">
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
+          {item.id}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.partner?.name ?? "No Partner"}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.code_order}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.customer_name}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.address}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {formatNumber(item.price)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {formatNumber(item.mass_of_order)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.time_service}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
+          <span
+            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+              item.status === "Success"
+                ? "bg-green-100 text-green-800"
+                : item.status === "Delivery"
+                ? "bg-blue-100 text-blue-800"
+                : item.status === "Pending"
+                ? "bg-yellow-100 text-yellow-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {item.status}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleShowDetail(item)}
+              className="text-yellow-600 hover:text-yellow-900"
+              title="View Details"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path
+                  fillRule="evenodd"
+                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() =>
+                handleDelete(
+                  `${API_URL2}/api/admin/order`,
+                  item.id,
+                  cookies.token,
+                  () => handleLoadData(currentPage)
+                )
+              }
+              className="text-red-600 hover:text-red-900"
+              title="Delete"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    ));
+
   return (
     <div className="flex justify-center bg-white p-3 m-3 rounded-md">
       <ToastContainer
@@ -212,9 +306,7 @@ function OrderPage() {
       />
       <div className="w-full">
         {!showAddForm && !showDetailForm ? (
-          // Nội dung hiển thị khi không có form add order
           <>
-            {/* ... */}
             <div className="mb-4 flex justify-between">
               <div className="flex-grow flex items-center">
                 <select
@@ -231,19 +323,7 @@ function OrderPage() {
                 </select>
                 <input
                   type="text"
-                  placeholder={`Search by ${
-                    searchType === "name"
-                      ? "Name"
-                      : searchType === "address"
-                      ? "Address"
-                      : searchType === "phone"
-                      ? "Phone"
-                      : searchType === "partner_name"
-                      ? "Partner Name"
-                      : searchType === "code_order"
-                      ? "Code Order"
-                      : "Status"
-                  }`}
+                  placeholder={`Search by ${searchType.replace("_", " ")}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border border-gray-300 p-2 rounded-md"
@@ -257,118 +337,19 @@ function OrderPage() {
                   Add
                 </button>
               </div>
-              {/* ... */}
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-fixed">
-                <thead>
-                  <tr>
-                    <th
-                      className={`border px-4 py-2 cursor-pointer  ${getSortIcon(
-                        "id"
-                      )}`}
-                      onClick={() => handleSort("id")}
-                    >
-                      ID
-                    </th>
-                    <th className="border px-4 py-2">Partner</th>
-                    <th className="border px-4 py-2">Code Order</th>
-                    <th
-                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                        "customer_name"
-                      )}`}
-                      onClick={() => handleSort("customer_name")}
-                    >
-                      Customer
-                    </th>
-                    {/* <th className="border px-4 py-2" style={{ width: "7%" }}>
-                    Phone
-                  </th> */}
-                    <th className="border px-4 py-2">Address</th>
-                    <th
-                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                        "price"
-                      )}`}
-                      onClick={() => handleSort("price")}
-                    >
-                      Price (VND)
-                    </th>
-                    <th
-                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                        "mass_of_order"
-                      )}`}
-                      onClick={() => handleSort("mass_of_order")}
-                    >
-                      Weight (kg)
-                    </th>
-                    <th
-                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                        "time_service"
-                      )}`}
-                      onClick={() => handleSort("time_service")}
-                    >
-                      Time Service (minutes)
-                    </th>
-                    <th
-                      className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                        "status"
-                      )}`}
-                      onClick={() => handleSort("status")}
-                    >
-                      Status
-                    </th>
-                    <th className="border px-4 py-2">Operation</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentPageData.map((item) => (
-                    <tr key={item.id}>
-                      <td className="border px-4 py-2">{item.id}</td>
-                      <td className="border px-4 py-2">
-                        {item.partner?.name ?? "No Partner"}
-                      </td>
-                      <td className="border px-4 py-2">{item.code_order}</td>
-                      <td className="border px-4 py-2">{item.customer_name}</td>
-                      {/* <td className="border px-4 py-2">{item.phone}</td> */}
-                      <td className="border px-4 py-2">{item.address}</td>
-                      <td className="border px-4 py-2">
-                        {item.price
-                          ? parseFloat(item.price).toLocaleString("en-US", {
-                              maximumSignificantDigits: 20,
-                            })
-                          : ""}
-                      </td>
-                      <td className="border px-4 py-2">
-                        {parseFloat(item.mass_of_order)}
-                      </td>
-                      <td className="border px-4 py-2">{item.time_service}</td>
-                      <td className="border px-4 py-2">
-                        {item.status === "Success" ? (
-                          <span className="text-green-500">Success</span>
-                        ) : item.status === "Delivery" ? (
-                          <span className="text-yellow-500">Delivery</span>
-                        ) : (
-                          <span className="text-red-500">Pending</span>
-                        )}
-                      </td>
-                      <td className="border px-1 py-2">
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleShowDetail(item)}
-                            className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
-                          >
-                            Detail
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item)}
-                            className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-800"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+            <div
+              className="overflow-x-auto cursor-grab active:cursor-grabbing"
+              ref={tableRef}
+              onMouseDown={handleMouseDown}
+              onMouseLeave={handleMouseLeave}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+            >
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">{renderTableHeader()}</thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {renderTableBody()}
                 </tbody>
               </table>
             </div>
@@ -378,12 +359,23 @@ function OrderPage() {
                 nextLabel={"Next"}
                 pageCount={pageCount}
                 onPageChange={handlePageChange}
-                containerClassName={"pagination"}
-                previousLinkClassName={"pagination__link"}
-                nextLinkClassName={"pagination__link"}
-                disabledClassName={"pagination__link--disabled"}
-                activeClassName={"pagination__link--active"}
+                containerClassName={
+                  "flex justify-center items-center space-x-2 mt-4"
+                }
+                pageClassName={
+                  "px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
+                }
+                previousClassName={
+                  "px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
+                }
+                nextClassName={
+                  "px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
+                }
+                activeClassName={"!bg-blue-500 text-white"}
+                disabledClassName={"opacity-50 cursor-not-allowed"}
                 forcePage={currentPage - 1}
+                pageRangeDisplayed={3}
+                marginPagesDisplayed={1}
               />
             )}
           </>
@@ -400,11 +392,11 @@ function OrderPage() {
             currentPage={currentProductPage}
             pageCount={productPageCount}
             onPageChange={handleProductPageChange}
-            // onProductUpdated={handleProductUpdated}
           />
         )}
       </div>
     </div>
   );
 }
+
 export default OrderPage;

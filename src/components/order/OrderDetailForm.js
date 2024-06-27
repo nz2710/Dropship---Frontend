@@ -1,8 +1,7 @@
-import React from "react";
-import { API_URL2 } from "../../utils/constant";
-// import { useCookies } from "react-cookie";
-// import { toast } from "react-toastify";
+import React, { useRef } from "react";
 import ReactPaginate from "react-paginate";
+import { formatNumber } from '../../utils/commonUtils';
+import { useTableDragScroll } from '../../hooks/useTableDragScroll';
 
 function OrderDetailForm({
   order,
@@ -12,274 +11,113 @@ function OrderDetailForm({
   onClose,
   onPageChange,
 }) {
+  const tableRef = useRef(null);
+  const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } = useTableDragScroll(tableRef);
+
+  const renderInfoItem = (label, value) => (
+    <div className="mb-2">
+      <span className="font-semibold">{label}:</span> {value}
+    </div>
+  );
+
+  const getStatusBadge = (status) => {
+    const colors = {
+      Success: "bg-green-100 text-green-800",
+      Delivery: "bg-blue-100 text-blue-800",
+      Pending: "bg-yellow-100 text-yellow-800"
+    };
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || colors.Pending}`}>
+        {status}
+      </span>
+    );
+  };
+
   return (
-    <div className="p-2">
-      <h2 className="text-xl font-bold mb-3">Order Details</h2>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Code Order</label>
-          {/* {isEditing ? (
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : ( */}
-          <p>{order.order.code_order}</p>
-          {/* )} */}
+    <div className="bg-white p-6 rounded-lg shadow-sm w-full mx-auto">
+      <h2 className="text-2xl font-bold mb-6">Order Details</h2>
+      
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div>
+          {renderInfoItem("Code Order", order.order.code_order)}
+          {renderInfoItem("Customer", order.order.customer_name)}
+          {renderInfoItem("Phone", order.order.phone)}
+          {renderInfoItem("Address", order.order.address)}
+          {renderInfoItem("Created at", new Date(order.order.created_at).toLocaleString())}
         </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Price (VND)</label>
-          <p>
-            {order.order.price
-              ? parseFloat(order.order.price).toLocaleString("en-US", {
-                  maximumSignificantDigits: 20,
-                })
-              : ""}
-          </p>
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Partner</label>
-          {/* {isEditing ? (
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            ></textarea>
-          ) : ( */}
-          <p>{order.order.partner && order.order.partner.name}</p>
-          {/* )} */}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Discount (%)</label>
-          {/* {isEditing ? (
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          ) : ( */}
-          <p>{parseFloat(order.order.discount)}</p>
-
-          {/* <p
-              className={
-                product.status === "active" ? "text-green-500" : "text-red-500"
-              }
-            >
-              {product.status === "active" ? "Active" : "Inactive"}
-            </p> */}
-          {/* )} */}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Customer Name</label>
-          {/* {isEditing ? (
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : ( */}
-          <p>{order.order.customer_name}</p>
-          {/* )} */}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Phone</label>
-          {/* {isEditing ? (
-            <input
-              type="number"
-              name="cost"
-              value={formData.cost}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : ( */}
-          <p>{order.order.phone}</p>
-          {/* )} */}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Address</label>
-          {/* {isEditing ? (
-            <input
-              type="number"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : ( */}
-          <p>{order.order.address}</p>
-          {/* )} */}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Status</label>
-          <p>
-            {order.order.status === "Success" ? (
-              <span className="text-green-500">Success</span>
-            ) : order.order.status === "Delivery" ? (
-              <span className="text-yellow-500">Delivery</span>
-            ) : (
-              <span className="text-red-500">Pending</span>
-            )}
-          </p>
-          {/* {isEditing && (
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="mt-2"
-            />
-          )} */}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Longitude</label>
-          <p>{parseFloat(order.order.longitude)}</p>
-          {/* Sử dụng parseFloat để loại bỏ các số 0 thừa */}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Latitude</label>
-          <p>{parseFloat(order.order.latitude)}</p>
-          {/* Sử dụng parseFloat để loại bỏ các số 0 thừa */}
+        <div>
+          {renderInfoItem("Partner", order.order.partner?.name || "N/A")}
+          {renderInfoItem("Price", `${formatNumber(order.order.price)} VND`)}
+          {renderInfoItem("Discount", `${order.order.discount}%`)}
+          {renderInfoItem("Status", getStatusBadge(order.order.status))}
+          {renderInfoItem("Updated at", new Date(order.order.updated_at).toLocaleString())}
         </div>
       </div>
 
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Weight (kg)</label>
-          <p>{parseFloat(order.order.mass_of_order)}</p>
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Time Service (minutes)</label>
-          <p>{order.order.time_service}</p>
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Created at</label>
-          <p>{new Date(order.order.created_at).toLocaleString()}</p>
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Updated at</label>
-          <p>{new Date(order.order.updated_at).toLocaleString()}</p>
-        </div>
-      </div>
-
-      {/* Thêm bảng hiển thị thông tin product ở đây */}
-      <h3 className="text-lg font-bold">Products</h3>
-      <table className="min-w-full">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2">ID</th>
-            <th className="border px-4 py-2">Name</th>
-            <th className="border px-4 py-2">SKU</th>
-            <th className="border px-4 py-2">Price (VND)</th>
-            <th className="border px-4 py-2">Cost (VND)</th>
-            <th className="border px-4 py-2">Quantity</th>
-            <th className="border px-4 py-2">Image</th>
-            <th className="border px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.id}>
-              <td className="border px-4 py-2">{product.id}</td>
-              <td className="border px-4 py-2">{product.name}</td>
-              <td className="border px-4 py-2">{product.sku}</td>
-              <td className="border px-4 py-2">
-                {product.price
-                  ? parseFloat(product.price).toLocaleString("en-US", {
-                      maximumSignificantDigits: 20,
-                    })
-                  : ""}
-              </td>
-              <td className="border px-4 py-2">
-                {product.cost
-                  ? parseFloat(product.cost).toLocaleString("en-US", {
-                      maximumSignificantDigits: 20,
-                    })
-                  : ""}
-              </td>
-              <td className="border px-4 py-2">{product.quantity}</td>
-              <td className="border px-4 py-2">
-                <img
-                  src={`${API_URL2}/images/products/${product.image}`}
-                  alt={product.name}
-                  className="w-20 h-20 object-cover"
-                />
-              </td>
-              <td className="border px-4 py-2">
-                {product.status === "Active" ? (
-                  <span className="text-green-500">Active</span>
-                ) : (
-                  <span className="text-red-500">Inactive</span>
-                )}
-              </td>
+      <h3 className="text-xl font-bold mb-4">Products</h3>
+      <div 
+        className="overflow-x-auto mb-6"
+        ref={tableRef}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              {["Name", "SKU", "Price", "Quantity", "Status"].map((header) => (
+                <th key={header} className="p-2 text-left text-sm font-semibold text-gray-600">
+                  {header}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {products.map((product, index) => (
+              <tr key={product.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                <td className="p-2">{product.name}</td>
+                <td className="p-2">{product.sku}</td>
+                <td className="p-2">{formatNumber(product.price)} VND</td>
+                <td className="p-2">{product.quantity}</td>
+                <td className="p-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    product.status === "Active" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  }`}>
+                    {product.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {pageCount > 0 && (
         <ReactPaginate
           previousLabel={"Previous"}
           nextLabel={"Next"}
           pageCount={pageCount}
           onPageChange={onPageChange}
-          containerClassName={"pagination"}
-          previousLinkClassName={"pagination__link"}
-          nextLinkClassName={"pagination__link"}
-          disabledClassName={"pagination__link--disabled"}
-          activeClassName={"pagination__link--active"}
+          containerClassName={"flex justify-center items-center space-x-2 mt-4"}
+          pageClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+          previousClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+          nextClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+          activeClassName={"!bg-blue-500 text-white"}
+          disabledClassName={"opacity-50 cursor-not-allowed"}
           forcePage={currentPage - 1}
+          pageRangeDisplayed={3}
+          marginPagesDisplayed={1}
         />
       )}
-      <div className="flex justify-end">
-        {/* {isEditing ? (
-          <>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
-            >
-              Save
-            </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-          </>
-        ) : ( */}
-        {/* <> */}
-        {/* <button
-              onClick={handleEdit}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
-            >
-              Edit
-            </button> */}
+
+      <div className="text-right mt-6">
         <button
           onClick={onClose}
-          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-200"
         >
           Close
         </button>
-        {/* </>
-        )} */}
       </div>
     </div>
   );

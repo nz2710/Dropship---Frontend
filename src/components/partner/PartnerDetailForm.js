@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import ReactPaginate from "react-paginate";
 import { toast } from "react-toastify";
+import { formatNumber } from '../../utils/commonUtils';
+import { useTableDragScroll } from '../../hooks/useTableDragScroll';
 
 function PartnerDetailForm({
   partner,
@@ -16,6 +18,9 @@ function PartnerDetailForm({
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(partner);
   const [cookies] = useCookies(["token"]);
+  const tableRef = useRef(null);
+  const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } = useTableDragScroll(tableRef);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -45,20 +50,40 @@ function PartnerDetailForm({
         onPartnerUpdated(data.data);
         setIsEditing(false);
       } else {
-        throw new Error("Failed to update partner information");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update partner information");
       }
     } catch (error) {
       toast.error("Error: " + error.message);
     }
   };
 
+  const renderInfoItem = (label, value, editComponent = null) => (
+    <div className="mb-4">
+      <span className="font-semibold">{label}:</span>{" "}
+      {isEditing && editComponent ? editComponent : value}
+    </div>
+  );
+
+  const getStatusBadge = (status) => {
+    const colors = {
+      Active: "bg-green-100 text-green-800",
+      Inactive: "bg-red-100 text-red-800"
+    };
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}>
+        {status}
+      </span>
+    );
+  };
+
   return (
-    <div className="p-2">
-      <h2 className="text-xl font-bold mb-3">Partner Details</h2>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Name</label>
-          {isEditing ? (
+    <div className="bg-white p-6 rounded-lg shadow-sm w-full mx-auto">
+      <h2 className="text-2xl font-bold mb-6">Partner Details</h2>
+      
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div>
+          {renderInfoItem("Name", partner.name, 
             <input
               type="text"
               name="name"
@@ -66,13 +91,8 @@ function PartnerDetailForm({
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{partner.name}</p>
           )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Address</label>
-          {isEditing ? (
+          {renderInfoItem("Address", partner.address,
             <input
               type="text"
               name="address"
@@ -80,15 +100,8 @@ function PartnerDetailForm({
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{partner.address}</p>
           )}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Phone</label>
-          {isEditing ? (
+          {renderInfoItem("Phone", partner.phone,
             <input
               type="text"
               name="phone"
@@ -96,13 +109,8 @@ function PartnerDetailForm({
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{partner.phone}</p>
           )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Status</label>
-          {isEditing ? (
+          {renderInfoItem("Status", getStatusBadge(partner.status),
             <select
               name="status"
               value={formData.status}
@@ -112,21 +120,8 @@ function PartnerDetailForm({
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
-          ) : (
-            <p>
-              {partner.status === "Active" ? (
-                <span className="text-green-500">Active</span>
-              ) : (
-                <span className="text-red-500">Inactive</span>
-              )}
-            </p>
           )}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Gender</label>
-          {isEditing ? (
+          {renderInfoItem("Gender", partner.gender,
             <select
               name="gender"
               value={formData.gender}
@@ -137,13 +132,11 @@ function PartnerDetailForm({
               <option value="Female">Female</option>
               <option value="Other">Other</option>
             </select>
-          ) : (
-            <p>{partner.gender}</p>
           )}
+          {renderInfoItem("Created At", new Date(partner.created_at).toLocaleString())}
         </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Date of Birth</label>
-          {isEditing ? (
+        <div>
+          {renderInfoItem("Date of Birth", partner.date_of_birth,
             <input
               type="date"
               name="date_of_birth"
@@ -151,19 +144,9 @@ function PartnerDetailForm({
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{partner.date_of_birth}</p>
           )}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Number of Orders</label>
-          <p>{partner.number_of_order}</p>
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Discount</label>
-          {isEditing ? (
+          {renderInfoItem("Number of Orders", partner.number_of_order)}
+          {renderInfoItem("Discount", `${partner.discount}%`,
             <input
               type="number"
               name="discount"
@@ -171,116 +154,87 @@ function PartnerDetailForm({
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{partner.discount}</p>
           )}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Revenue</label>
-          <p>
-            {partner.revenue
-              ? parseFloat(partner.revenue).toLocaleString("en-US", {
-                  maximumSignificantDigits: 20,
-                })
-              : ""}
-          </p>
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Commission</label>
-          <p>
-            {partner.commission
-              ? parseFloat(partner.commission).toLocaleString("en-US", {
-                  maximumSignificantDigits: 20,
-                })
-              : ""}
-          </p>
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Created At</label>
-          <p>{new Date(partner.created_at).toLocaleString()}</p>
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Updated At</label>
-          <p>{new Date(partner.updated_at).toLocaleString()}</p>
+          {renderInfoItem("Revenue", `${formatNumber(partner.revenue)} VND`)}
+          {renderInfoItem("Commission", `${formatNumber(partner.commission)} VND`)}
+          {renderInfoItem("Updated At", new Date(partner.updated_at).toLocaleString())}
         </div>
       </div>
 
-      {/* Thêm bảng hiển thị thông tin order ở đây */}
-      <h3 className="text-lg font-bold">Orders</h3>
-      <table className="min-w-full">
-        <thead>
-          <tr>
-            <th className="border px-4 py-2">ID</th>
-            <th className="border px-4 py-2">Code Order</th>
-            <th className="border px-4 py-2">Customer Name</th>
-            <th className="border px-4 py-2">Phone</th>
-            <th className="border px-4 py-2">Price</th>
-            <th className="border px-4 py-2">Discount</th>
-            <th className="border px-4 py-2">Address</th>
-            <th className="border px-4 py-2">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.id}>
-              <td className="border px-4 py-2">{order.id}</td>
-              <td className="border px-4 py-2">{order.code_order}</td>
-              <td className="border px-4 py-2">{order.customer_name}</td>
-              <td className="border px-4 py-2">{order.phone}</td>
-              <td className="border px-4 py-2">
-                {order.price
-                  ? parseFloat(order.price).toLocaleString("en-US", {
-                      maximumSignificantDigits: 20,
-                    })
-                  : ""}
-              </td>
-              <td className="border px-4 py-2">{parseFloat(order.discount)}</td>
-              <td className="border px-4 py-2">{order.address}</td>
-              <td className="border px-4 py-2">
-                {order.status === "Success" ? (
-                  <span className="text-green-500">Success</span>
-                ) : order.status === "Delivery" ? (
-                  <span className="text-yellow-500">Delivery</span>
-                ) : (
-                  <span className="text-red-500">Pending</span>
-                )}
-              </td>
+      <h3 className="text-xl font-bold mb-4">Orders</h3>
+      <div 
+        className="overflow-x-auto mb-6"
+        ref={tableRef}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              {["ID", "Code Order", "Customer Name", "Phone", "Price", "Discount", "Address", "Status"].map((header) => (
+                <th key={header} className="p-2 text-left text-sm font-semibold text-gray-600 border-b">
+                  {header}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {orders.map((order, index) => (
+              <tr key={order.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                <td className="p-2 border-b">{order.id}</td>
+                <td className="p-2 border-b">{order.code_order}</td>
+                <td className="p-2 border-b">{order.customer_name}</td>
+                <td className="p-2 border-b">{order.phone}</td>
+                <td className="p-2 border-b">{formatNumber(order.price)} VND</td>
+                <td className="p-2 border-b">{order.discount}%</td>
+                <td className="p-2 border-b">{order.address}</td>
+                <td className="p-2 border-b">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    order.status === "Success" ? "bg-green-100 text-green-800" :
+                    order.status === "Delivery" ? "bg-yellow-100 text-yellow-800" :
+                    "bg-red-100 text-red-800"
+                  }`}>
+                    {order.status}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {pageCount > 0 && (
         <ReactPaginate
           previousLabel={"Previous"}
           nextLabel={"Next"}
           pageCount={pageCount}
           onPageChange={onPageChange}
-          containerClassName={"pagination"}
-          previousLinkClassName={"pagination__link"}
-          nextLinkClassName={"pagination__link"}
-          disabledClassName={"pagination__link--disabled"}
-          activeClassName={"pagination__link--active"}
+          containerClassName={"flex justify-center items-center space-x-2 mt-4"}
+          pageClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+          previousClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+          nextClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+          activeClassName={"!bg-blue-500 text-white"}
+          disabledClassName={"opacity-50 cursor-not-allowed"}
           forcePage={currentPage - 1}
+          pageRangeDisplayed={3}
+          marginPagesDisplayed={1}
         />
       )}
-      {/* Render other partner details */}
-      {/* ... */}
-      <div className="flex justify-end">
+
+      <div className="flex justify-end mt-6">
         {isEditing ? (
           <>
             <button
               onClick={handleSave}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Save
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Cancel
             </button>
@@ -289,13 +243,13 @@ function PartnerDetailForm({
           <>
             <button
               onClick={handleEdit}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Edit
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Close
             </button>

@@ -1,4 +1,5 @@
 import React from "react";
+import { formatNumber } from "../../utils/commonUtils";
 
 function DepotDetailsModal({
   setShowDetailModal,
@@ -8,141 +9,120 @@ function DepotDetailsModal({
   setSelectedDepot,
   handleSaveDepot,
 }) {
+  const renderInfoItem = (label, value, editComponent = null) => (
+    <div className="mb-4">
+      <span className="font-semibold">{label}:</span>{" "}
+      {editing && editComponent ? editComponent : value}
+    </div>
+  );
+
+  const getStatusBadge = (status) => {
+    const colors = {
+      Active: "bg-green-100 text-green-800",
+      Inactive: "bg-red-100 text-red-800",
+    };
+    return (
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}
+      >
+        {status}
+      </span>
+    );
+  };
+
   return (
-    <div className="p-2">
-      <h2 className="text-lg font-bold mb-4">Depot Details</h2>
+    <div className="bg-white p-6 rounded-lg shadow-sm w-full mx-auto">
+      <h2 className="text-2xl font-bold mb-6">Depot Details</h2>
+
       {selectedDepot && (
-        <div>
-          <div className="flex">
-            <div className="w-1/2 mr-2">
-              <label className="block mb-1 font-bold">Name</label>
-              {editing ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={selectedDepot.name}
-                  onChange={(e) =>
-                    setSelectedDepot({
-                      ...selectedDepot,
-                      name: e.target.value,
-                    })
-                  }
-                  className="border border-gray-300 p-2 rounded-md w-full"
-                />
-              ) : (
-                <p>{selectedDepot.name}</p>
-              )}
-            </div>
-            <div className="w-1/2 ml-2">
-              <label className="block mb-1 font-bold">Code</label>
-              <p>D{selectedDepot.id}</p>
-            </div>
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <div>
+            {renderInfoItem(
+              "Name",
+              selectedDepot.name,
+              <input
+                type="text"
+                name="name"
+                value={selectedDepot.name}
+                onChange={(e) =>
+                  setSelectedDepot({ ...selectedDepot, name: e.target.value })
+                }
+                className="border border-gray-300 p-2 rounded-md w-full"
+              />
+            )}
+            {renderInfoItem("Code", `D${selectedDepot.id}`)}
+            {renderInfoItem(
+              "Phone",
+              selectedDepot.phone,
+              <input
+                type="text"
+                name="phone"
+                value={selectedDepot.phone}
+                onChange={(e) =>
+                  setSelectedDepot({ ...selectedDepot, phone: e.target.value })
+                }
+                className="border border-gray-300 p-2 rounded-md w-full"
+              />
+            )}
+            {renderInfoItem(
+              "Address",
+              selectedDepot.address,
+              <input
+                type="text"
+                name="address"
+                value={selectedDepot.address}
+                onChange={(e) =>
+                  setSelectedDepot({
+                    ...selectedDepot,
+                    address: e.target.value,
+                  })
+                }
+                className="border border-gray-300 p-2 rounded-md w-full"
+              />
+            )}
+            {renderInfoItem(
+              "Status",
+              getStatusBadge(selectedDepot.status),
+              <select
+                name="status"
+                value={selectedDepot.status}
+                onChange={(e) =>
+                  setSelectedDepot({ ...selectedDepot, status: e.target.value })
+                }
+                className="border border-gray-300 p-2 rounded-md w-full"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            )}
           </div>
-          <div className="flex">
-            <div className="w-1/2 mr-2">
-              <label className="block mb-1 font-bold">Phone</label>
-              {editing ? (
-                <input
-                  type="text"
-                  name="phone"
-                  value={selectedDepot.phone}
-                  onChange={(e) =>
-                    setSelectedDepot({
-                      ...selectedDepot,
-                      phone: e.target.value,
-                    })
-                  }
-                  className="border border-gray-300 p-2 rounded-md w-full"
-                />
-              ) : (
-                <p>{selectedDepot.phone}</p>
-              )}
-            </div>
-            <div className="w-1/2 ml-2">
-              <label className="block mb-1 font-bold">Address</label>
-              {editing ? (
-                <input
-                  type="text"
-                  name="address"
-                  value={selectedDepot.address}
-                  onChange={(e) =>
-                    setSelectedDepot({
-                      ...selectedDepot,
-                      address: e.target.value,
-                    })
-                  }
-                  className="border border-gray-300 p-2 rounded-md w-full"
-                />
-              ) : (
-                <p>{selectedDepot.address}</p>
-              )}
-            </div>
-          </div>
-          <div className="flex">
-            <div className="w-1/2 mr-2">
-              <label className="block mb-1 font-bold">Longitude</label>
-              <p>{parseFloat(selectedDepot.longitude)}</p>
-            </div>
-            <div className="w-1/2 ml-2">
-              <label className="block mb-1 font-bold">Latitude</label>
-              <p>{parseFloat(selectedDepot.latitude)}</p>
-            </div>
-          </div>
-          <div className="flex">
-            <div className="w-1/2 mr-2">
-              <label className="block mb-1 font-bold">Created Time</label>
-              <p>{new Date(selectedDepot.created_at).toLocaleString()}</p>
-            </div>
-            <div className="w-1/2 ml-2">
-              <label className="block mb-1 font-bold">Updated Time</label>
-              <p>{new Date(selectedDepot.updated_at).toLocaleString()}</p>
-            </div>
-          </div>
-          <div className="flex">
-            <div className="w-full">
-              <label className="block mb-1 font-bold">Status</label>
-              {editing ? (
-                <select
-                  name="status"
-                  value={selectedDepot.status}
-                  onChange={(e) =>
-                    setSelectedDepot({
-                      ...selectedDepot,
-                      status: e.target.value,
-                    })
-                  }
-                  className="border border-gray-300 p-2 rounded-md w-full"
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              ) : (
-                <p
-                  className={
-                    selectedDepot.status === "Active"
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }
-                >
-                  {selectedDepot.status}
-                </p>
-              )}
-            </div>
+          <div>
+            {renderInfoItem("Longitude", formatNumber(selectedDepot.longitude))}
+            {renderInfoItem("Latitude", formatNumber(selectedDepot.latitude))}
+            {renderInfoItem(
+              "Created Time",
+              new Date(selectedDepot.created_at).toLocaleString()
+            )}
+            {renderInfoItem(
+              "Updated Time",
+              new Date(selectedDepot.updated_at).toLocaleString()
+            )}
           </div>
         </div>
       )}
-      <div className="flex justify-end mt-4 space-x-2">
+
+      <div className="flex justify-end mt-6">
         {editing ? (
           <>
             <button
               onClick={handleSaveDepot}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Save
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Cancel
             </button>
@@ -151,13 +131,13 @@ function DepotDetailsModal({
           <>
             <button
               onClick={() => setEditing(true)}
-              className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Edit
             </button>
             <button
               onClick={() => setShowDetailModal(false)}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Close
             </button>

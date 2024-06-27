@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactPaginate from "react-paginate";
 import { API_URL2 } from "../utils/constant";
 import { useCookies } from "react-cookie";
@@ -6,6 +6,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AddProductForm from "../components/product/AddProductForm";
 import ProductDetailForm from "../components/product/ProductDetailForm";
+import {
+  getSortIcon,
+  handleSort,
+  handleDelete,
+  formatNumber,
+} from "../utils/commonUtils";
+import { useTableDragScroll } from "../hooks/useTableDragScroll";
 
 function Product() {
   const [orderBy, setOrderBy] = useState("id");
@@ -21,45 +28,50 @@ function Product() {
   const dataPerPage = 10;
   const [cookies] = useCookies(["token"]);
 
+  const tableRef = useRef(null);
+  const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } =
+    useTableDragScroll(tableRef);
+
   const handlePageChange = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage + 1);
     handleLoadData(selectedPage + 1);
   };
 
-  const handleLoadData = useCallback(async (page = currentPage) => {
-    const url = new URL(`${API_URL2}/api/admin/product`);
-    url.searchParams.append("pageSize", dataPerPage);
-    url.searchParams.append("order_by", orderBy);
-    url.searchParams.append("sort_by", sortBy);
-    url.searchParams.append("page", page);
+  const handleLoadData = useCallback(
+    async (page = currentPage) => {
+      const url = new URL(`${API_URL2}/api/admin/product`);
+      url.searchParams.append("pageSize", dataPerPage);
+      url.searchParams.append("order_by", orderBy);
+      url.searchParams.append("sort_by", sortBy);
+      url.searchParams.append("page", page);
 
-    if (searchType === "name") {
-      url.searchParams.append("name", searchTerm);
-    } else if (searchType === "sku") {
-      url.searchParams.append("sku", searchTerm);
-    }
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: "Bearer " + cookies.token,
-      },
-    });
-    if (response.status === 200) {
-      const body = (await response.json()).data;
-      setCurrentPageData(body.data);
-      setPageCount(body.last_page);
-      if (body.data.length === 0 && page > 1) {
-        setCurrentPage(page - 1);
-      } else {
-        setCurrentPage(page);
+      if (searchTerm) {
+        url.searchParams.append(searchType, searchTerm);
       }
-    } else {
-      console.log("Fail", response);
-    }
-  }, [cookies.token, currentPage, dataPerPage, orderBy, searchTerm, searchType, sortBy]);
+
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        });
+        if (response.status === 200) {
+          const body = (await response.json()).data;
+          setCurrentPageData(body.data);
+          setPageCount(body.last_page);
+          setCurrentPage(body.data.length === 0 && page > 1 ? page - 1 : page);
+        } else {
+          throw new Error("Failed to fetch data");
+        }
+      } catch (error) {
+        toast.error("Error: " + error.message);
+      }
+    },
+    [cookies.token, currentPage, dataPerPage, orderBy, searchTerm, searchType, sortBy]
+  );
 
   useEffect(() => {
     handleLoadData();
@@ -75,42 +87,6 @@ function Product() {
 
   const handleProductAdded = () => {
     handleLoadData(currentPage);
-  };
-
-  const handleSort = (column) => {
-    if (orderBy === column) {
-      setSortBy(sortBy === "asc" ? "desc" : "asc");
-    } else {
-      setOrderBy(column);
-      setSortBy("asc");
-    }
-  };
-  const getSortIcon = (column) => {
-    if (orderBy === column) {
-      return sortBy === "asc" ? "sort-asc" : "sort-desc";
-    }
-    return "";
-  };
-
-  const handleDelete = async (item) => {
-    try {
-      const response = await fetch(`${API_URL2}/api/admin/product/${item.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + cookies.token,
-        },
-      });
-      if (response.status === 200) {
-        toast.success("Product successfully deleted.");
-        handleLoadData(currentPage);
-      } else {
-        throw new Error("Failed to delete item");
-      }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
   };
 
   const handleShowDetail = async (item) => {
@@ -158,6 +134,7 @@ function Product() {
       if (response.status === 200) {
         const data = await response.json();
         setSelectedProduct(data.data);
+        handleLoadData(currentPage);
       } else {
         throw new Error("Failed to fetch updated product details");
       }
@@ -165,6 +142,128 @@ function Product() {
       toast.error("Error: " + error.message);
     }
   };
+
+  const renderTableHeader = () => (
+    <tr>
+      {[
+        { label: "ID", key: "id" },
+        { label: "Name", key: "name" },
+        { label: "SKU", key: null },
+        { label: "Description", key: null },
+        { label: "Price (VND)", key: "price" },
+        { label: "Cost (VND)", key: "cost" },
+        { label: "Quantity", key: "quantity" },
+        { label: "Status", key: "status" },
+        { label: "Operation", key: null },
+      ].map((column, index) => (
+        <th
+          key={column.label}
+          className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+            column.key ? "cursor-pointer" : ""
+          } ${index !== 8 ? "border-r border-gray-200" : ""}`}
+          onClick={() =>
+            column.key &&
+            handleSort(column.key, orderBy, sortBy, setOrderBy, setSortBy)
+          }
+        >
+          <div className="flex items-center">
+            <span>{column.label}</span>
+            {column.key && (
+              <span className="ml-1">
+                {getSortIcon(column.key, orderBy, sortBy)}
+              </span>
+            )}
+          </div>
+        </th>
+      ))}
+    </tr>
+  );
+
+  const renderTableBody = () =>
+    currentPageData.map((item) => (
+      <tr key={item.id} className="hover:bg-gray-50">
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200">
+          {item.id}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.name}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.sku}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.description}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {formatNumber(item.price)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {formatNumber(item.cost)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.quantity}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
+          <span
+            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+              item.status === "Active"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {item.status}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleShowDetail(item)}
+              className="text-yellow-600 hover:text-yellow-900"
+              title="View Details"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path
+                  fillRule="evenodd"
+                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={() =>
+                handleDelete(
+                  `${API_URL2}/api/admin/product`,
+                  item.id,
+                  cookies.token,
+                  () => handleLoadData(currentPage)
+                )
+              }
+              className="text-red-600 hover:text-red-900"
+              title="Delete"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+    ));
 
   return (
     <div className="flex justify-center bg-white p-3 m-3 rounded-md">
@@ -191,13 +290,10 @@ function Product() {
                 >
                   <option value="name">Name</option>
                   <option value="sku">SKU</option>
-                  {/* <option value="phone">Phone</option> */}
                 </select>
                 <input
                   type="text"
-                  placeholder={`Search by ${
-                    searchType === "name" ? "Name" : "SKU"
-                  }`}
+                  placeholder={`Search by ${searchType}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="border border-gray-300 p-2 rounded-md"
@@ -211,130 +307,38 @@ function Product() {
                   Add
                 </button>
               </div>
-
-              {/* ... */}
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full table-fixed">
-              <thead>
-                <tr>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "id"
-                    )}`}
-                    onClick={() => handleSort("id")}
-                  >
-                    ID
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "name"
-                    )}`}
-                    onClick={() => handleSort("name")}
-                  >
-                    Name
-                  </th>
-                  <th className="border px-4 py-2">SKU</th>
-                  <th className="border px-4 py-2 ">Description</th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "price"
-                    )}`}
-                    onClick={() => handleSort("price")}
-                  >
-                    Price (VND)
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "cost"
-                    )}`}
-                    onClick={() => handleSort("cost")}
-                  >
-                    Cost (VND)
-                  </th>
-                  <th
-                    className={`border px-4 py-2 cursor-pointer ${getSortIcon(
-                      "quantity"
-                    )}`}
-                    onClick={() => handleSort("quantity")}
-                  >
-                    Quantity
-                  </th>
-                  <th className="border px-4 py-2">Image</th>
-                  <th className="border px-4 py-2">Status</th>
-                  <th className="border px-4 py-2">Operation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPageData.map((item) => (
-                  <tr key={item.id}>
-                    <td className="border px-4 py-2">{item.id}</td>
-                    <td className="border px-4 py-2">{item.name}</td>
-                    <td className="border px-4 py-2">{item.sku}</td>
-                    <td className="border px-4 py-2">{item.description}</td>
-                    <td className="border px-4 py-2">
-                    {item.price
-                        ? parseFloat(item.price).toLocaleString("en-US", {
-                            maximumSignificantDigits: 20,
-                          })
-                        : ""}
-                    </td>
-                    <td className="border px-4 py-2">
-                    {item.cost
-                        ? parseFloat(item.cost).toLocaleString("en-US", {
-                            maximumSignificantDigits: 20,
-                          })
-                        : ""}
-                    </td>
-                    <td className="border px-4 py-2">{item.quantity}</td>
-                    <td className="border px-4 py-2">
-                      <img
-                        src={`${API_URL2}/images/products/${item.image}`}
-                        alt="img"
-                        className="w-15 h-15 object-cover"
-                      />
-                    </td>
-                    <td className="border px-4 py-2">
-                      {item.status === "Active" ? (
-                        <span className="text-green-500">Active</span>
-                      ) : (
-                        <span className="text-red-500">Inactive</span>
-                      )}
-                    </td>
-                    <td className="border px-1 py-2">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleShowDetail(item)}
-                          className="bg-yellow-500 text-white p-2 rounded-lg hover:bg-yellow-800"
-                        >
-                          Detail
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item)}
-                          className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-800"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div
+              className="overflow-x-auto cursor-grab active:cursor-grabbing"
+              ref={tableRef}
+              onMouseDown={handleMouseDown}
+              onMouseLeave={handleMouseLeave}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+            >
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">{renderTableHeader()}</thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {renderTableBody()}
+                </tbody>
+              </table>
             </div>
             {pageCount > 0 && (
-            <ReactPaginate
-              previousLabel={"Previous"}
-              nextLabel={"Next"}
-              pageCount={pageCount}
-              onPageChange={handlePageChange}
-              containerClassName={"pagination"}
-              previousLinkClassName={"pagination__link"}
-              nextLinkClassName={"pagination__link"}
-              disabledClassName={"pagination__link--disabled"}
-              activeClassName={"pagination__link--active"}
-              forcePage={currentPage - 1}
-            />
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                pageCount={pageCount}
+                onPageChange={handlePageChange}
+                containerClassName={"flex justify-center items-center space-x-2 mt-4"}
+                pageClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+                previousClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+                nextClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
+                activeClassName={"!bg-blue-500 text-white"}
+                disabledClassName={"opacity-50 cursor-not-allowed"}
+                forcePage={currentPage - 1}
+                pageRangeDisplayed={3}
+                marginPagesDisplayed={1}
+              />
             )}
           </>
         ) : showAddForm ? (
@@ -353,4 +357,5 @@ function Product() {
     </div>
   );
 }
+
 export default Product;

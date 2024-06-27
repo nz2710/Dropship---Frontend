@@ -56,26 +56,12 @@ const _nav = [
     to: '/plan',
     icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
   },
-
-  // {
-  //   component: CNavItem,
-  //   name: 'khách hàng',
-  //   to: '/googlemap',
-  //   icon: <CIcon icon={cilContact} customClassName="nav-icon" />,
-  // },
-
   {
     component: CNavItem,
-    name: 'Routing',
-    to: '/settings',
+    name: 'Schedule',
+    to: '/schedule',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
-  // {
-  //   component: CNavItem,
-  //   name: 'Googlemap',
-  //   to: '/googlemap',
-  //   icon: <CIcon icon={cilMap} customClassName="nav-icon" />,
-  // },
   {
     component: CNavItem,
     name: 'User',

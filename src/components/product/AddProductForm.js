@@ -36,7 +36,8 @@ function AddProductForm({ onClose, onProductAdded }) {
         onProductAdded();
         onClose();
       } else {
-        throw new Error("Failed to add product");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add product");
       }
     } catch (error) {
       toast.error("Error: " + error.message);

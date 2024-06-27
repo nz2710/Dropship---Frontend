@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import { formatNumber } from "../../utils/commonUtils";
 
 function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(vehicle);
-  //   const [selectedImage, setSelectedImage] = useState(null);
   const [cookies] = useCookies(["token"]);
 
   const handleChange = (e) => {
@@ -37,22 +37,45 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
         const updatedVehicle = await response.json();
         onVehicleUpdated(updatedVehicle.data);
         setIsEditing(false);
-        // setSelectedImage(null);
       } else {
-        throw new Error("Failed to update vehicle information");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update vehicle information");
       }
     } catch (error) {
       toast.error("Error: " + error.message);
     }
   };
 
+  const renderInfoItem = (label, value, editComponent = null) => (
+    <div className="mb-4">
+      <span className="font-semibold">{label}:</span>{" "}
+      {isEditing && editComponent ? editComponent : value}
+    </div>
+  );
+
+  const getStatusBadge = (status) => {
+    const colors = {
+      Active: "bg-green-100 text-green-800",
+      Inactive: "bg-red-100 text-red-800",
+    };
+    return (
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}
+      >
+        {status}
+      </span>
+    );
+  };
+
   return (
-    <div className="p-2">
-      <h2 className="text-xl font-bold mb-3">Vehicle Details</h2>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Name</label>
-          {isEditing ? (
+    <div className="bg-white p-6 rounded-lg shadow-sm w-full mx-auto">
+      <h2 className="text-2xl font-bold mb-6">Vehicle Details</h2>
+
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div>
+          {renderInfoItem(
+            "Name",
+            vehicle.name,
             <input
               type="text"
               name="name"
@@ -60,29 +83,11 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{vehicle.name}</p>
           )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Total Vehicle</label>
-          {isEditing ? (
-            <input
-              type="number"
-              name="total_vehicles"
-              value={formData.total_vehicles}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : (
-            <p>{vehicle.total_vehicles}</p>
-          )}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Capacity (kg)</label>
-          {isEditing ? (
+
+          {renderInfoItem(
+            "Capacity (kg)",
+            vehicle.capacity,
             <input
               type="number"
               name="capacity"
@@ -90,53 +95,23 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{vehicle.capacity}</p>
           )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Speed (km/h)</label>
-          {isEditing ? (
+
+          {renderInfoItem(
+            "Hourly Rate (VND/h)",
+            formatNumber(vehicle.hourly_rate),
             <input
               type="number"
-              name="speed"
-              value={formData.speed}
+              name="hourly_rate"
+              value={formData.hourly_rate}
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{vehicle.speed}</p>
           )}
-        </div>
-        {/* <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Status</label>
-          {isEditing ? (
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          ) : (
-            <p
-              className={
-                product.status === "active" ? "text-green-500" : "text-red-500"
-              }
-            >
-              {product.status === "active" ? "Active" : "Inactive"}
-            </p>
-          )}
-        </div> */}
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">
-            Fuel Consumption (l/km)
-          </label>
-          {isEditing ? (
+
+          {renderInfoItem(
+            "Fuel Consumption (l/km)",
+            vehicle.fuel_consumption,
             <input
               type="number"
               name="fuel_consumption"
@@ -144,13 +119,65 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{vehicle.fuel_consumption}</p>
+          )}
+          {renderInfoItem(
+            "Created At",
+            new Date(vehicle.created_at).toLocaleString()
+          )}
+          {renderInfoItem(
+            "Status",
+            getStatusBadge(vehicle.status),
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md w-full"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
           )}
         </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Fuel Cost (VND)</label>
-          {isEditing ? (
+        <div>
+          {renderInfoItem(
+            "Total Vehicle",
+            vehicle.total_vehicles,
+            <input
+              type="number"
+              name="total_vehicles"
+              value={formData.total_vehicles}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md w-full"
+            />
+          )}
+
+          {renderInfoItem(
+            "Speed (km/h)",
+            vehicle.speed,
+            <input
+              type="number"
+              name="speed"
+              value={formData.speed}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md w-full"
+            />
+          )}
+
+          {renderInfoItem(
+            "Shipping Rate (VND/kg)",
+            formatNumber(vehicle.shipping_rate),
+            <input
+              type="number"
+              name="shipping_rate"
+              value={formData.shipping_rate}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md w-full"
+            />
+          )}
+
+          {renderInfoItem(
+            "Fuel Cost (VND)",
+            formatNumber(vehicle.fuel_cost),
             <input
               type="number"
               name="fuel_cost"
@@ -158,63 +185,27 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>
-              {vehicle.fuel_cost
-                ? parseFloat(vehicle.fuel_cost).toLocaleString("vi-VN", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0,
-                  })
-                : ""}
-            </p>
+          )}
+
+          {renderInfoItem(
+            "Updated At",
+            new Date(vehicle.updated_at).toLocaleString()
           )}
         </div>
       </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Created At</label>
-          <p>{new Date(vehicle.created_at).toLocaleString()}</p>
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Updated At</label>
-          <p>{new Date(vehicle.updated_at).toLocaleString()}</p>
-        </div>
-      </div>
-      <div className="mb-4">
-        <label className="block mb-1 font-bold">Status</label>
-        {isEditing ? (
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="border border-gray-300 p-2 rounded-md w-full"
-          >
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        ) : (
-          <p
-            className={
-              vehicle.status === "active" ? "text-green-500" : "text-red-500"
-            }
-          >
-            {vehicle.status === "active" ? "Active" : "Inactive"}
-          </p>
-        )}
-      </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mt-6">
         {isEditing ? (
           <>
             <button
               onClick={handleSave}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Save
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Cancel
             </button>
@@ -223,13 +214,13 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
           <>
             <button
               onClick={handleEdit}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Edit
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Close
             </button>

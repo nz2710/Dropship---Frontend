@@ -165,7 +165,8 @@ function AddOrderForm({ onClose, onOrderAdded }) {
         onOrderAdded();
         onClose();
       } else {
-        throw new Error("Failed to add order");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add order");
       }
     } catch (error) {
       toast.error("Error: " + error.message);

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import { formatNumber } from "../../utils/commonUtils";
 
 function ProductDetailForm({ product, onClose, onProductUpdated }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -54,20 +55,44 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
         setIsEditing(false);
         setSelectedImage(null);
       } else {
-        throw new Error("Failed to update product information");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update product information");
       }
     } catch (error) {
       toast.error("Error: " + error.message);
     }
   };
 
+  const renderInfoItem = (label, value, editComponent = null) => (
+    <div className="mb-4">
+      <span className="font-semibold">{label}:</span>{" "}
+      {isEditing && editComponent ? editComponent : value}
+    </div>
+  );
+
+  const getStatusBadge = (status) => {
+    const colors = {
+      Active: "bg-green-100 text-green-800",
+      Inactive: "bg-red-100 text-red-800",
+    };
+    return (
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status]}`}
+      >
+        {status}
+      </span>
+    );
+  };
+
   return (
-    <div className="p-2">
-      <h2 className="text-xl font-bold mb-3">Product Details</h2>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Name</label>
-          {isEditing ? (
+    <div className="bg-white p-6 rounded-lg shadow-sm w-full mx-auto">
+      <h2 className="text-2xl font-bold mb-6">Product Details</h2>
+
+      <div className="grid grid-cols-2 gap-6 mb-8">
+        <div>
+          {renderInfoItem(
+            "Name",
+            product.name,
             <input
               type="text"
               name="name"
@@ -75,32 +100,32 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             />
-          ) : (
-            <p>{product.name}</p>
           )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">SKU</label>
-          <p>{product.sku}</p>
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Description</label>
-          {isEditing ? (
+          {renderInfoItem(
+            "Cost",
+            `${formatNumber(product.cost)} VND`,
+            <input
+              type="number"
+              name="cost"
+              value={formData.cost}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md w-full"
+            />
+          )}
+
+          {renderInfoItem(
+            "Description",
+            product.description,
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               className="border border-gray-300 p-2 rounded-md w-full"
             ></textarea>
-          ) : (
-            <p>{product.description}</p>
           )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Status</label>
-          {isEditing ? (
+          {renderInfoItem(
+            "Status",
+            getStatusBadge(product.status),
             <select
               name="status"
               value={formData.status}
@@ -110,84 +135,14 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
-          ) : (
-            <p
-              className={
-                product.status === "Active" ? "text-green-500" : "text-red-500"
-              }
-            >
-              {product.status === "Active" ? "Active" : "Inactive"}
-            </p>
           )}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Price</label>
-          {isEditing ? (
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : (
-            <p>
-              {product.price
-                ? parseFloat(product.price).toLocaleString("en-US", {
-                    maximumSignificantDigits: 20,
-                  })
-                : ""}
-            </p>
-          )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Cost</label>
-          {isEditing ? (
-            <input
-              type="number"
-              name="cost"
-              value={formData.cost}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : (
-            <p>
-              {product.cost
-                ? parseFloat(product.cost).toLocaleString("en-US", {
-                    maximumSignificantDigits: 20,
-                  })
-                : ""}
-            </p>
-          )}
-        </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Quantity</label>
-          {isEditing ? (
-            <input
-              type="number"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          ) : (
-            <p>{product.quantity}</p>
-          )}
-        </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Image</label>
-          {product.image && (
+          {renderInfoItem(
+            "Image",
             <img
               src={`http://localhost:82/images/products/${product.image}`}
               alt={product.name}
-              className="w-40 h-40 object-cover"
-            />
-          )}
-          {isEditing && (
+              className="w-20 h-20 object-cover"
+            />,
             <input
               type="file"
               accept="image/*"
@@ -196,29 +151,55 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
             />
           )}
         </div>
-      </div>
-      <div className="flex">
-        <div className="w-1/2 mr-2">
-          <label className="block mb-1 font-bold">Created at</label>
-          <p>{new Date(product.created_at).toLocaleString()}</p>
+        <div>
+          {renderInfoItem("SKU", product.sku)}
+
+          {renderInfoItem(
+            "Quantity",
+            product.quantity,
+            <input
+              type="number"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md w-full"
+            />
+          )}
+          {renderInfoItem(
+            "Price",
+            `${formatNumber(product.price)} VND`,
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="border border-gray-300 p-2 rounded-md w-full"
+            />
+          )}
+
+          {renderInfoItem(
+            "Created at",
+            new Date(product.created_at).toLocaleString()
+          )}
+          {renderInfoItem(
+            "Updated at",
+            new Date(product.updated_at).toLocaleString()
+          )}
         </div>
-        <div className="w-1/2 ml-2">
-          <label className="block mb-1 font-bold">Updated at</label>
-          <p>{new Date(product.updated_at).toLocaleString()}</p>
-        </div>
       </div>
-      <div className="flex justify-end">
+
+      <div className="flex justify-end mt-6">
         {isEditing ? (
           <>
             <button
               onClick={handleSave}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Save
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Cancel
             </button>
@@ -227,13 +208,13 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
           <>
             <button
               onClick={handleEdit}
-              className="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 mr-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mr-2"
             >
               Edit
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
               Close
             </button>

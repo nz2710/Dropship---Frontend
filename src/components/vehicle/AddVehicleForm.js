@@ -9,6 +9,8 @@ function AddVehicleForm({ onClose, onVehicleAdded }) {
   const [speed, setSpeed] = useState("");
   const [fuel_consumption, setFuelConsumption] = useState("");
   const [fuel_cost, setFuelCost] = useState("");
+  const [hourly_rate, setHourlyRate] = useState("");
+  const [shipping_rate, setShippingRate] = useState("");
   const [total_vehicles, setTotalVehicle] = useState("");
   const [cookies] = useCookies(["token"]);
 
@@ -28,6 +30,8 @@ function AddVehicleForm({ onClose, onVehicleAdded }) {
           speed,
           fuel_consumption,
           fuel_cost,
+          hourly_rate,
+          shipping_rate,
           total_vehicles,
         }),
       });
@@ -36,7 +40,8 @@ function AddVehicleForm({ onClose, onVehicleAdded }) {
         onVehicleAdded();
         onClose();
       } else {
-        throw new Error("Failed to add vehicle");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add vehicle");
       }
     } catch (error) {
       toast.error("Error: " + error.message);
@@ -126,6 +131,34 @@ function AddVehicleForm({ onClose, onVehicleAdded }) {
               id="fuel_cost"
               value={fuel_cost}
               onChange={(e) => setFuelCost(e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
+              required
+            />
+          </div>
+        </div>
+        <div className="flex mb-4">
+          <div className="w-1/2 mr-2">
+            <label htmlFor="hourly_rate" className="block mb-1">
+            Hourly Rate
+            </label>
+            <input
+              type="number"
+              id="hourly_rate"
+              value={hourly_rate}
+              onChange={(e) => setHourlyRate(e.target.value)}
+              className="border border-gray-300 p-2 rounded w-full"
+              required
+            />
+          </div>
+          <div className="w-1/2 ml-2">
+            <label htmlFor="shipping_rate" className="block mb-1">
+            Shipping Rate
+            </label>
+            <input
+              type="number"
+              id="shipping_rate"
+              value={shipping_rate}
+              onChange={(e) => setShippingRate(e.target.value)}
               className="border border-gray-300 p-2 rounded w-full"
               required
             />
