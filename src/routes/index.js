@@ -1,14 +1,14 @@
-import OrderPage from "../pages/order";
-import PartnerPage from "../pages/partner";
-import LoginPage from "../pages/login";
-import Settings from "../pages/setting";
-import Product from "../pages/product";
-import Depot from "../pages/depot";
-import Dashboard from "../pages/dashboard";
-import User from "../pages/user";
-import Plan from "../pages/plan";
-import Vehicle from "../pages/vehicle";
-import Route from "../pages/route";
+import OrderPage from "../pages/admin/order";
+import PartnerPage from "../pages/admin/partner";
+import LoginPage from "../pages/admin/login";
+import Settings from "../pages/admin/setting";
+import Product from "../pages/admin/product";
+import Depot from "../pages/admin/depot";
+import Dashboard from "../pages/admin/dashboard";
+import User from "../pages/admin/user";
+import Plan from "../pages/admin/plan";
+import Vehicle from "../pages/admin/vehicle";
+import Route from "../pages/admin/route";
 import PlanDetailForm from "../components/plan/PlanDetailForm";
 
 

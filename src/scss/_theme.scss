@@ -15,8 +15,25 @@ body {
   min-height: calc(4rem + 1px); // stylelint-disable-line function-disallowed-list
 }
 
-.sidebar-brand-full {
-  margin-left: 3px;
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  padding: 10px 10px; /* Giảm khoảng cách trên và dưới logo */
+  height: 40px; /* Giảm chiều cao của .sidebar-brand */
+}
+
+.sidebar-brand-icon img {
+  height: 36px; /* Giảm kích thước biểu tượng logo */
+}
+
+.sidebar-brand-text {
+  font-size: 1.25rem; /* Giảm kích thước chữ "DropShipping" */
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.sidebar-brand-narrow {
+  display: none;
 }
 
 .sidebar-header {
@@ -40,6 +57,14 @@ body {
 .sidebar-narrow-unfoldable:not(:hover) {
   .sidebar-toggler {
     @include ltr-rtl("margin-right", auto);
+  }
+
+  .sidebar-brand-text {
+    display: none;
+  }
+
+  .sidebar-brand-narrow {
+    display: block;
   }
 }
 

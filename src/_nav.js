@@ -11,64 +11,63 @@ import {
   cilUserPlus,
   cilHome
 } from '@coreui/icons'
-import {  CNavItem } from '@coreui/react'
+import { CNavItem } from '@coreui/react'
 
 const _nav = [
   {
     component: CNavItem,
     name: 'Dashboard',
-    to: '/dashboard',
+    to: '/admin/dashboard',
     icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />
   },
   {
     component: CNavItem,
     name: 'Depot',
-    to: '/depot',
+    to: '/admin/depot',
     icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Vehicle',
-    to: '/vehicle',
+    to: '/admin/vehicle',
     icon: <CIcon icon={cilTruck} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Partner',
-    to: '/partner',
+    to: '/admin/partner',
     icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Product',
-    to: '/product',
+    to: '/admin/product',
     icon: <CIcon icon={cilGift} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Order',
-    to: '/order',
+    to: '/admin/order',
     icon: <CIcon icon={cilCart} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Plan',
-    to: '/plan',
+    to: '/admin/plan',
     icon: <CIcon icon={cilCalendar} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'Schedule',
-    to: '/schedule',
+    to: '/admin/schedule',
     icon: <CIcon icon={cilSettings} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
     name: 'User',
-    to: '/user',
+    to: '/admin/user',
     icon: <CIcon icon={cilUserPlus} customClassName="nav-icon" />,
   }
 ];
-
 
 export default _nav

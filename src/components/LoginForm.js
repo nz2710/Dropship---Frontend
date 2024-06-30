@@ -39,7 +39,16 @@ const Logindiv = () => {
     if (response.status === 200) {
       const data = await response.json();
       setCookie("token", data.result.token);
-      navigate("/dashboard");
+  
+      // Kiểm tra vai trò của người dùng
+      const userRoles = data.result.user.roles;
+      let redirectPath = "/admin/dashboard"; // Đường dẫn mặc định cho admin
+  
+      if (userRoles.some((role) => role.name === "partner")) {
+        redirectPath = "/partner/dashboard"; // Đường dẫn cho partner
+      }
+  
+      navigate(redirectPath);
     } else {
       setErrosMess("Login failed");
     }
