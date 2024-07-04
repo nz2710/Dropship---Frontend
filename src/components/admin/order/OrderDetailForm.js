@@ -91,7 +91,7 @@ function OrderDetailForm({
         customer_name: formData.customer_name,
         phone: formData.phone,
         mass_of_order: formData.mass_of_order,
-        time_service: formData.time_service,
+        // time_service: formData.time_service,
         products: editedProducts.map((product) => ({
           id: product.id,
           quantity: parseInt(product.pivot.quantity),
@@ -171,7 +171,7 @@ function OrderDetailForm({
               name="customer_name"
               value={formData.customer_name}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -183,7 +183,7 @@ function OrderDetailForm({
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -195,7 +195,7 @@ function OrderDetailForm({
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -207,13 +207,30 @@ function OrderDetailForm({
               name="mass_of_order"
               value={formData.mass_of_order}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
+          )}
+          {renderInfoItem(
+            "Time Service",
+            `${formatNumber(formData.time_service)} minutes`,
+            "time_service"
+            // <input
+            //   type="number"
+            //   name="time_service"
+            //   value={formData.time_service}
+            //   onChange={handleChange}
+            //   className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            // />
           )}
           {renderInfoItem(
             "Created at",
             new Date(formData.created_at).toLocaleString(),
             "created_at"
+          )}
+          {renderInfoItem(
+            "Updated at",
+            new Date(formData.updated_at).toLocaleString(),
+            "updated_at"
           )}
         </div>
         <div>
@@ -228,16 +245,24 @@ function OrderDetailForm({
             "price"
           )}
           {renderInfoItem(
-            "Discount",
-            `${formData.discount}%`,
-            "discount"
-            // <input
-            //   type="number"
-            //   name="discount"
-            //   value={formData.discount}
-            //   onChange={handleChange}
-            //   className="border border-gray-300 p-2 rounded-md w-full"
-            // />
+            "Base Price",
+            `${formatNumber(formData.total_base_price)} VND`,
+            "total_base_price"
+          )}
+          {renderInfoItem(
+            "Commission",
+            `${formatNumber(formData.commission)} VND`,
+            "commission"
+          )}
+          {renderInfoItem(
+            "Total Cost",
+            `${formatNumber(formData.total_cost)} VND`,
+            "total_cost"
+          )}
+          {renderInfoItem(
+            "Profit",
+            `${formatNumber(formData.profit)} VND`,
+            "profit"
           )}
           {renderInfoItem(
             "Status",
@@ -247,7 +272,7 @@ function OrderDetailForm({
             //   name="status"
             //   value={formData.status}
             //   onChange={handleChange}
-            //   className="border border-gray-300 p-2 rounded-md w-full"
+            //   className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             // >
             //   <option value="Waiting">Waiting</option>
             //   <option value="Pending">Pending</option>
@@ -256,21 +281,9 @@ function OrderDetailForm({
             // </select>
           )}
           {renderInfoItem(
-            "Time Service",
-            `${formatNumber(formData.time_service)} minutes`,
-            "time_service",
-            <input
-              type="number"
-              name="time_service"
-              value={formData.time_service}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
-          )}
-          {renderInfoItem(
-            "Updated at",
-            new Date(formData.updated_at).toLocaleString(),
-            "updated_at"
+            "Expected Date",
+            formData.expected_date || "N/A",
+            "expected_date"
           )}
         </div>
       </div>
@@ -342,7 +355,7 @@ function OrderDetailForm({
                           onChange={(e) =>
                             handleProductChange(index, "price", e.target.value)
                           }
-                          className="border border-gray-300 p-2 rounded-md w-full"
+                          className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           min="0"
                         />
                         {parseFloat(product.pivot.price) < originalPrice && (
@@ -368,7 +381,7 @@ function OrderDetailForm({
                               e.target.value
                             )
                           }
-                          className="border border-gray-300 p-2 rounded-md w-full"
+                          className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           min="1"
                         />
                         {parseInt(product.pivot.quantity) >
@@ -411,7 +424,7 @@ function OrderDetailForm({
         </table>
       </div>
 
-      {pageCount > 0 && (
+      {pageCount > 1 && (
         <ReactPaginate
           previousLabel={"Previous"}
           nextLabel={"Next"}

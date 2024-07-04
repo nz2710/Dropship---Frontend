@@ -5,7 +5,8 @@ import {
 //   cilSettings,
   cilClipboard,
   cilCart,
-  cilHome
+  cilHome,
+  cilChart
 } from '@coreui/icons'
 import { CNavItem } from '@coreui/react'
 
@@ -27,6 +28,12 @@ const _partnerNav = [
     name: 'Products',
     to: '/partner/products',
     icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Commission',
+    to: '/partner/commission',
+    icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
   },
 ];
 

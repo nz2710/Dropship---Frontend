@@ -287,8 +287,16 @@ const RouteInfoTable = ({ route }) => (
         { label: "Plan ID", value: route.plan_id },
         { label: "Departure Depot", value: route.depot_name },
         {
+          label: "Total Distance (km)",
+          value: formatNumber(route.total_distance),
+        },
+        {
+          label: "Total Time (minutes)",
+          value: formatNumber(route.total_time_serving),
+        },
+        {
           label: "Total Demand (kg)",
-          value: formatNumber(route.total_demand, 2),
+          value: formatNumber(route.total_demand),
         },
         { label: "Alternative", value: route.alternative ? "Yes" : "No" },
         { label: "Is Served", value: route.is_served ? "Yes" : "No" },
@@ -314,11 +322,15 @@ const RouteFinancialTable = ({ route }) => (
       {[
         { label: "Moving Cost", value: formatNumber(route.moving_cost) },
         { label: "Labor Cost", value: formatNumber(route.labor_cost) },
-        { label: "Fee", value: formatNumber(route.fee) },
-        { label: "Unloading Cost", value: formatNumber(route.unloading_cost) },
+        { label: "Total Cost", value: formatNumber(route.fee) },
+        { label: "Shipping Fee", value: formatNumber(route.unloading_cost) },
         {
           label: "Total Order Value",
           value: formatNumber(route.total_order_value),
+        },
+        {
+          label: "Total Order Profit",
+          value: formatNumber(route.total_order_profit),
         },
         { label: "Route Value", value: formatNumber(route.total_route_value) },
         { label: "Profit", value: formatNumber(route.profit) },

@@ -35,22 +35,21 @@ function Plan() {
 
   const handlePageChange = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage + 1);
-    handleLoadData(selectedPage + 1);
+    // handleLoadData(selectedPage + 1);
   };
 
   const handleLoadData = useCallback(
     async (page = currentPage) => {
-      const url = new URL(`${API_URL2}/api/admin/routing`);
-      url.searchParams.append("pageSize", dataPerPage);
-      url.searchParams.append("order_by", orderBy);
-      url.searchParams.append("sort_by", sortBy);
-      url.searchParams.append("page", page);
-
-      if (searchTerm) {
-        url.searchParams.append(searchType, searchTerm);
-      }
-
       try {
+        const url = new URL(`${API_URL2}/api/admin/routing`);
+        url.searchParams.append("pageSize", dataPerPage);
+        url.searchParams.append("order_by", orderBy);
+        url.searchParams.append("sort_by", sortBy);
+        url.searchParams.append("page", page);
+
+        if (searchTerm) {
+          url.searchParams.append(searchType, searchTerm);
+        }
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -84,7 +83,7 @@ function Plan() {
 
   useEffect(() => {
     handleLoadData();
-  }, [currentPage, searchType, searchTerm, orderBy, sortBy, handleLoadData]);
+  }, [handleLoadData]);
 
   const handleShowDetail = async (item) => {
     try {
@@ -115,57 +114,81 @@ function Plan() {
   };
 
   const handleConfirm = async (planId) => {
-    try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/plans/${planId}/confirm`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
-        }
-      );
+    if (window.confirm("Are you sure you want to confirm this plan?")) {
+      try {
+        const response = await fetch(
+          `${API_URL2}/api/admin/plans/${planId}/confirm`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + cookies.token,
+            },
+          }
+        );
 
-      if (response.ok) {
-        toast.success("Plan confirmed successfully");
-        handleLoadData(currentPage); // Reload data after confirming
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to confirm plan");
+        if (response.ok) {
+          toast.success("Plan confirmed successfully");
+          handleLoadData(currentPage);
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to confirm plan");
+        }
+      } catch (error) {
+        toast.error("Error: " + error.message);
       }
-    } catch (error) {
-      toast.error("Error: " + error.message);
     }
   };
 
-  const handleComplete = async (planId) => {
-    try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/plans/${planId}/complete`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
+  const handleCompletePlan = async (planId) => {
+    if (window.confirm("Are you sure you want to complete this plan?")) {
+      try {
+        const response = await fetch(
+          `${API_URL2}/api/admin/plans/${planId}/complete`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: "Bearer " + cookies.token,
+            },
+          }
+        );
+        if (response.status === 200) {
+          const result = await response.json();
+          toast.success(result.message);
+          handleLoadData(currentPage);
+        } else {
+          throw new Error("Failed to complete plan");
         }
-      );
-
-      if (response.ok) {
-        toast.success("Plan completed successfully");
-        handleLoadData(currentPage); // Reload data after completing
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to complete plan");
+      } catch (error) {
+        toast.error("Error: " + error.message);
       }
-    } catch (error) {
-      toast.error("Error: " + error.message);
     }
   };
 
+  // Cập nhật render button cho trường hợp Complete
+  const renderCompleteButton = (item) => (
+    <button
+      onClick={() => handleCompletePlan(item.id)}
+      className="text-green-600 hover:text-green-900"
+      title="Complete"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+      >
+        <path
+          fillRule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </button>
+  );
   const handleRoutePageChange = async (selectedPage) => {
     const currentPage = selectedPage.selected + 1;
     try {
@@ -203,11 +226,12 @@ function Plan() {
       {[
         { label: "ID", key: "id" },
         { label: "Name", key: "name" },
+        { label: "Expected Date", key: "expected_date" },
         { label: "Distance (km)", key: "total_distance" },
         { label: "Time (min)", key: "total_time_serving" },
         { label: "Weight (kg)", key: "total_demand" },
-        { label: "Fee (VND)", key: "fee" },
-        { label: "Value (VND)", key: "total_plan_value" },
+        // { label: "Fee (VND)", key: "fee" },
+        // { label: "Value (VND)", key: "total_plan_value" },
         { label: "Profit (VND)", key: "profit" },
         { label: "Status", key: "status" },
         { label: "Actions", key: null },
@@ -245,20 +269,23 @@ function Plan() {
           {item.name}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
-          {formatNumber(item.total_distance, 2)}
+          {item.expected_date}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
-          {formatNumber(item.total_time_serving, 0)}
+          {formatNumber(item.total_distance)}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
-          {formatNumber(item.total_demand, 2)}
+          {formatNumber(item.total_time_serving)}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {formatNumber(item.total_demand)}
+        </td>
+        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
           {formatNumber(item.fee)}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
           {formatNumber(item.total_plan_value)}
-        </td>
+        </td> */}
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
           {formatNumber(item.profit)}
         </td>
@@ -297,24 +324,7 @@ function Plan() {
                 </svg>
               </button>
             ) : item.status === "Delivery" ? (
-              <button
-                onClick={() => handleComplete(item.id)}
-                className="text-green-600 hover:text-green-900"
-                title="Complete"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
+              renderCompleteButton(item)
             ) : null}
             <button
               onClick={() => handleShowDetail(item)}
@@ -365,28 +375,28 @@ function Plan() {
       </tr>
     ));
 
-  return (
-    <div className="flex justify-center bg-white p-3 m-3 rounded-md">
-      <ToastContainer
-        position="top-center"
-        autoClose={3000}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
-      <div className="w-full">
-        {!showDetailForm ? (
+    return (
+      <div className="flex justify-center bg-white p-3 m-3 rounded-md">
+        <ToastContainer
+          position="top-center"
+          autoClose={3000}
+          hideProgressBar
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        <div className="w-full">
+          {!showDetailForm ? (
           <>
             <div className="mb-4 flex justify-between">
               <div className="flex-grow flex items-center">
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md mr-2"
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
                 >
                   <option value="name">Name</option>
                   {/* <option value="status">Status</option> */}
@@ -396,7 +406,7 @@ function Plan() {
                   placeholder={`Search by ${searchType}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md"
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -415,7 +425,7 @@ function Plan() {
                 </tbody>
               </table>
             </div>
-            {pageCount > 0 && (
+            {pageCount > 1 && (
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
@@ -455,4 +465,5 @@ function Plan() {
     </div>
   );
 }
+
 export default Plan;

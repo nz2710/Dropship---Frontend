@@ -8,6 +8,8 @@ import Depot from "../pages/admin/depot";
 import Partner from "../pages/admin/partner";
 import Vehicle from "../pages/admin/vehicle";
 import Route from "../pages/admin/route";
+import MonthlyCommissionStats from "../pages/admin/commission";
+import BonusMilestones from "../pages/admin/milestone";
 import PlanDetailForm from "../components/admin/plan/PlanDetailForm";
 
 const adminRoutes = [
@@ -22,6 +24,8 @@ const adminRoutes = [
   { path: '/admin/route/:id', component: Route },
   { path: '/admin/partner', component: Partner },
   { path: '/admin/plan/:id', component: PlanDetailForm },
+  { path: '/admin/commission', component: MonthlyCommissionStats },
+  { path: '/admin/milestone', component: BonusMilestones }
 ];
 
 export default adminRoutes;

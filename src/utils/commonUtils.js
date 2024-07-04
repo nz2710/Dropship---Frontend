@@ -25,6 +25,7 @@ export const handleSort = (column, orderBy, sortBy, setOrderBy, setSortBy) => {
 };
 
 export const handleDelete = async (url, id, token, onSuccess) => {
+  if (window.confirm("Are you sure you want to delete this?")) {
   try {
     const response = await fetch(`${url}/${id}`, {
       method: "DELETE",
@@ -43,8 +44,19 @@ export const handleDelete = async (url, id, token, onSuccess) => {
   } catch (error) {
     toast.error("Error: " + error.message);
   }
+}
 };
 
+// export const formatNumber = (number) => {
+//   return number ? parseFloat(number).toLocaleString("en-US") : "";
+// };
+
 export const formatNumber = (number) => {
-  return number ? parseFloat(number).toLocaleString("en-US") : "";
+  if (number === null || number === undefined) return "";
+  
+  const parsedNumber = parseFloat(number);
+  
+  if (isNaN(parsedNumber)) return "";
+  
+  return parsedNumber.toLocaleString("en-US");
 };

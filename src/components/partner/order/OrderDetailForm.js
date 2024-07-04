@@ -174,7 +174,7 @@ function OrderDetailForm({
               name="customer_name"
               value={formData.customer_name}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -186,7 +186,7 @@ function OrderDetailForm({
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -198,7 +198,7 @@ function OrderDetailForm({
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -210,13 +210,30 @@ function OrderDetailForm({
               name="mass_of_order"
               value={formData.mass_of_order}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
+          )}
+          {renderInfoItem(
+            "Time Service",
+            `${formatNumber(formData.time_service)} minutes`,
+            "time_service"
+            // <input
+            //   type="number"
+            //   name="time_service"
+            //   value={formData.time_service}
+            //   onChange={handleChange}
+            //   className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+            // />
           )}
           {renderInfoItem(
             "Created at",
             new Date(formData.created_at).toLocaleString(),
             "created_at"
+          )}
+          {renderInfoItem(
+            "Updated at",
+            new Date(formData.updated_at).toLocaleString(),
+            "updated_at"
           )}
         </div>
         <div>
@@ -225,24 +242,21 @@ function OrderDetailForm({
             `${formatNumber(formData.price)} VND`,
             "price"
           )}
-          {renderInfoItem("Discount", `${formData.discount}%`, "discount")}
-          {renderInfoItem("Status", getStatusBadge(formData.status), "status")}
           {renderInfoItem(
-            "Time Service",
-            `${formatNumber(formData.time_service)} minutes`,
-            "time_service",
-            <input
-              type="number"
-              name="time_service"
-              value={formData.time_service}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
-            />
+            "Base Price",
+            `${formatNumber(formData.total_base_price)} VND`,
+            "total_base_price"
           )}
           {renderInfoItem(
-            "Updated at",
-            new Date(formData.updated_at).toLocaleString(),
-            "updated_at"
+            "Commission",
+            `${formatNumber(formData.commission)} VND`,
+            "commission"
+          )}
+          {renderInfoItem("Status", getStatusBadge(formData.status), "status")}
+          {renderInfoItem(
+            "Expected Date",
+            formData.expected_date || "N/A",
+            "expected_date"
           )}
         </div>
       </div>
@@ -314,7 +328,7 @@ function OrderDetailForm({
                           onChange={(e) =>
                             handleProductChange(index, "price", e.target.value)
                           }
-                          className="border border-gray-300 p-2 rounded-md w-full"
+                          className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           min="0"
                         />
                         {parseFloat(product.pivot.price) < originalPrice && (
@@ -340,7 +354,7 @@ function OrderDetailForm({
                               e.target.value
                             )
                           }
-                          className="border border-gray-300 p-2 rounded-md w-full"
+                          className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
                           min="1"
                         />
                         {parseInt(product.pivot.quantity) >
@@ -382,7 +396,7 @@ function OrderDetailForm({
           </tbody>
         </table>
       </div>
-      {pageCount > 0 && (
+      {pageCount > 1 && (
         <ReactPaginate
           previousLabel={"Previous"}
           nextLabel={"Next"}

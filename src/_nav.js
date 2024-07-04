@@ -9,9 +9,12 @@ import {
   cilTruck,
   cilCart,
   cilUserPlus,
-  cilHome
+  cilHome,
+  cilDollar,
+  cilChart,
+  cilList
 } from '@coreui/icons'
-import { CNavItem } from '@coreui/react'
+import { CNavItem, CNavGroup } from '@coreui/react'
 
 const _nav = [
   {
@@ -33,10 +36,29 @@ const _nav = [
     icon: <CIcon icon={cilTruck} customClassName="nav-icon" />,
   },
   {
-    component: CNavItem,
-    name: 'Partner',
-    to: '/admin/partner',
+    component: CNavGroup,
+    name: 'Collaborator',
     icon: <CIcon icon={cilPeople} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Collaborator List',
+        to: '/admin/partner',
+        icon: <CIcon icon={cilList} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Commission',
+        to: '/admin/commission',
+        icon: <CIcon icon={cilChart} customClassName="nav-icon" />,
+      },
+      {
+        component: CNavItem,
+        name: 'Bonus Milestones',
+        to: '/admin/milestone',
+        icon: <CIcon icon={cilDollar} customClassName="nav-icon" />,
+      },
+    ],
   },
   {
     component: CNavItem,

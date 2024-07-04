@@ -47,7 +47,7 @@ function DepotDetailsModal({
                 onChange={(e) =>
                   setSelectedDepot({ ...selectedDepot, name: e.target.value })
                 }
-                className="border border-gray-300 p-2 rounded-md w-full"
+                className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             )}
             {renderInfoItem("Code", `D${selectedDepot.id}`)}
@@ -61,7 +61,7 @@ function DepotDetailsModal({
                 onChange={(e) =>
                   setSelectedDepot({ ...selectedDepot, phone: e.target.value })
                 }
-                className="border border-gray-300 p-2 rounded-md w-full"
+                className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             )}
             {renderInfoItem(
@@ -77,7 +77,7 @@ function DepotDetailsModal({
                     address: e.target.value,
                   })
                 }
-                className="border border-gray-300 p-2 rounded-md w-full"
+                className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               />
             )}
             {renderInfoItem(
@@ -89,7 +89,7 @@ function DepotDetailsModal({
                 onChange={(e) =>
                   setSelectedDepot({ ...selectedDepot, status: e.target.value })
                 }
-                className="border border-gray-300 p-2 rounded-md w-full"
+                className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>

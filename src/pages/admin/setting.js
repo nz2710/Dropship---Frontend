@@ -6,11 +6,14 @@ import "react-toastify/dist/ReactToastify.css";
 import ReactPaginate from "react-paginate";
 import { getSortIcon, handleSort, formatNumber } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const steps = [
   "Select Depots",
   "Select Vehicle",
   "Select Orders",
+  "Select Date",
   "Configure Limits",
 ];
 
@@ -41,6 +44,7 @@ function Settings() {
   const [sortBy, setSortBy] = useState("asc");
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [vehicleLimitError, setVehicleLimitError] = useState("");
+  const [expectedDate, setExpectedDate] = useState(new Date());
 
   const tableRef = useRef(null);
   const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } =
@@ -158,6 +162,7 @@ function Settings() {
         vehicle_id: parseInt(vehicleId),
         select_all_orders: selectAllOrders,
         select_all_depots: selectAllDepots,
+        expected_date: expectedDate.toISOString().split("T")[0], // Format: YYYY-MM-DD
       };
 
       if (!selectAllOrders) {
@@ -188,7 +193,7 @@ function Settings() {
         toast.success("Settings successfully saved.");
         // Redirect or handle success as needed
         setTimeout(() => {
-          window.location.href = "/plan";
+          window.location.href = "/admin/plan";
         }, 3000);
       } else {
         const errorData = await response.json();
@@ -233,6 +238,10 @@ function Settings() {
       toast.error("Please select at least one order or select all orders.");
       return false;
     }
+    if (!expectedDate) {
+      toast.error("Please select an expected date.");
+      return false;
+    }
     return true;
   };
 
@@ -266,7 +275,7 @@ function Settings() {
             placeholder="Search by depot name"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border border-gray-300 p-2 rounded-md"
+            className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="flex items-center">
@@ -363,7 +372,7 @@ function Settings() {
             placeholder="Search by vehicle name"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border border-gray-300 p-2 rounded-md"
+            className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
@@ -462,7 +471,7 @@ function Settings() {
             placeholder="Search by customer name"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="border border-gray-300 p-2 rounded-md"
+            className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         <div className="flex items-center">
@@ -574,6 +583,19 @@ function Settings() {
     </div>
   );
 
+  const renderDatePicker = () => (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Select Expected Date</h2>
+      <DatePicker
+        selected={expectedDate}
+        onChange={(date) => setExpectedDate(date)}
+        dateFormat="yyyy-MM-dd"
+        minDate={new Date()}
+        className="w-full p-2 border border-gray-300 rounded"
+      />
+    </div>
+  );
+
   const renderLimitSettings = () => (
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Configure Limits</h2>
@@ -641,6 +663,8 @@ function Settings() {
       case 2:
         return renderOrderTable();
       case 3:
+        return renderDatePicker();
+      case 4:
         return renderLimitSettings();
       default:
         return null;

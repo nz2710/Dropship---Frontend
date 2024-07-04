@@ -31,22 +31,21 @@ function Product() {
 
   const handlePageChange = ({ selected: selectedPage }) => {
     setCurrentPage(selectedPage + 1);
-    handleLoadData(selectedPage + 1);
+    // handleLoadData(selectedPage + 1);
   };
 
   const handleLoadData = useCallback(
     async (page = currentPage) => {
-      const url = new URL(`${API_URL2}/api/partner/products`);
-      url.searchParams.append("pageSize", dataPerPage);
-      url.searchParams.append("order_by", orderBy);
-      url.searchParams.append("sort_by", sortBy);
-      url.searchParams.append("page", page);
-
-      if (searchTerm) {
-        url.searchParams.append(searchType, searchTerm);
-      }
-
       try {
+        const url = new URL(`${API_URL2}/api/partner/products`);
+        url.searchParams.append("pageSize", dataPerPage);
+        url.searchParams.append("order_by", orderBy);
+        url.searchParams.append("sort_by", sortBy);
+        url.searchParams.append("page", page);
+  
+        if (searchTerm) {
+          url.searchParams.append(searchType, searchTerm);
+        }
         const response = await fetch(url, {
           method: "GET",
           headers: {
@@ -80,7 +79,7 @@ function Product() {
 
   useEffect(() => {
     handleLoadData();
-  }, [currentPage, searchType, searchTerm, orderBy, sortBy, handleLoadData]);
+  }, [handleLoadData]);
 
   const handleShowDetail = async (item) => {
     try {
@@ -224,7 +223,7 @@ function Product() {
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md mr-2"
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
                 >
                   <option value="name">Name</option>
                   <option value="sku">SKU</option>
@@ -234,7 +233,7 @@ function Product() {
                   placeholder={`Search by ${searchType}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md"
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -253,7 +252,7 @@ function Product() {
                 </tbody>
               </table>
             </div>
-            {pageCount > 0 && (
+            {pageCount > 1 && (
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}

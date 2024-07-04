@@ -89,7 +89,7 @@ function PartnerDetailForm({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem("Address", partner.address,
@@ -98,7 +98,7 @@ function PartnerDetailForm({
               name="address"
               value={formData.address}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem("Phone", partner.phone,
@@ -107,7 +107,7 @@ function PartnerDetailForm({
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem("Status", getStatusBadge(partner.status),
@@ -115,7 +115,7 @@ function PartnerDetailForm({
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -126,7 +126,7 @@ function PartnerDetailForm({
               name="gender"
               value={formData.gender}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             >
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -142,7 +142,7 @@ function PartnerDetailForm({
               name="date_of_birth"
               value={formData.date_of_birth}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem("Number of Orders", partner.number_of_order)}
@@ -152,7 +152,7 @@ function PartnerDetailForm({
               name="discount"
               value={formData.discount}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem("Revenue", `${formatNumber(partner.revenue)} VND`)}
@@ -193,7 +193,9 @@ function PartnerDetailForm({
                 <td className="p-2 border-b">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     order.status === "Success" ? "bg-green-100 text-green-800" :
-                    order.status === "Delivery" ? "bg-yellow-100 text-yellow-800" :
+                    order.status === "Delivery" ? "bg-blue-100 text-blue-800" :
+                    order.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
+                    order.status === "Waiting" ? "bg-purple-100 text-purple-800" :
                     "bg-red-100 text-red-800"
                   }`}>
                     {order.status}
@@ -205,7 +207,7 @@ function PartnerDetailForm({
         </table>
       </div>
 
-      {pageCount > 0 && (
+      {pageCount > 1 && (
         <ReactPaginate
           previousLabel={"Previous"}
           nextLabel={"Next"}

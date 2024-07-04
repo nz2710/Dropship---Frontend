@@ -11,7 +11,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [massOfOrder, setMassOfOrder] = useState(0);
-  const [timeService, setTimeService] = useState(0);
+  // const [timeService, setTimeService] = useState(0);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -168,7 +168,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
           customer_name: customerName,
           phone,
           mass_of_order: massOfOrder,
-          time_service: timeService,
+          // time_service: timeService,
           products: selectedProducts.map(({ id, quantity, price }) => ({
             id,
             quantity,
@@ -281,7 +281,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
             required
           />
         </div>
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label htmlFor="timeService" className="block mb-1">
             Time Service
           </label>
@@ -293,7 +293,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
             className="border border-gray-300 p-2 rounded w-full"
             required
           />
-        </div>
+        </div> */}
         {/* Product selection */}
         <div className="mb-4">
           <label htmlFor="products" className="block mb-1">

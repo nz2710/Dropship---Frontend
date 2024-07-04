@@ -98,7 +98,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -109,7 +109,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               name="cost"
               value={formData.cost}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 
@@ -120,7 +120,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               name="description"
               value={formData.description}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             ></textarea>
           )}
           {renderInfoItem(
@@ -130,7 +130,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -162,7 +162,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               name="quantity"
               value={formData.quantity}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -173,7 +173,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
               name="price"
               value={formData.price}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 

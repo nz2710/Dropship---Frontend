@@ -81,7 +81,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 
@@ -93,7 +93,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="capacity"
               value={formData.capacity}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 
@@ -105,7 +105,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="hourly_rate"
               value={formData.hourly_rate}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 
@@ -117,7 +117,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="fuel_consumption"
               value={formData.fuel_consumption}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
           {renderInfoItem(
@@ -131,7 +131,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -147,7 +147,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="total_vehicles"
               value={formData.total_vehicles}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 
@@ -159,7 +159,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="speed"
               value={formData.speed}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 
@@ -171,7 +171,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="shipping_rate"
               value={formData.shipping_rate}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 
@@ -183,7 +183,7 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
               name="fuel_cost"
               value={formData.fuel_cost}
               onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md w-full"
+              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
             />
           )}
 

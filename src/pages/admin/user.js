@@ -37,17 +37,16 @@ const User = () => {
   };
 
   const handleLoadData = useCallback(async () => {
-    const url = new URL(`${API_URL}/api/admin/users`);
-    url.searchParams.append("pageSize", dataPerPage);
-    url.searchParams.append("page", currentPage);
-    url.searchParams.append("order_by", orderBy);
-    url.searchParams.append("sort_by", sortBy);
-
-    if (searchTerm) {
-      url.searchParams.append(searchType, searchTerm);
-    }
-
     try {
+      const url = new URL(`${API_URL}/api/admin/users`);
+      url.searchParams.append("pageSize", dataPerPage);
+      url.searchParams.append("page", currentPage);
+      url.searchParams.append("order_by", orderBy);
+      url.searchParams.append("sort_by", sortBy);
+  
+      if (searchTerm) {
+        url.searchParams.append(searchType, searchTerm);
+      }
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -125,7 +124,7 @@ const User = () => {
 
   useEffect(() => {
     handleLoadData();
-  }, [currentPage, orderBy, sortBy, searchType, searchTerm, handleLoadData]);
+  }, [handleLoadData]);
 
   const renderTableHeader = () => (
     <tr>
@@ -134,6 +133,7 @@ const User = () => {
         { label: "Username", key: "username" },
         { label: "Email", key: "email" },
         { label: "Role", key: null },
+        { label: "Partner ID", key: null },
         { label: "Status", key: "status" },
         { label: "Action", key: null },
       ].map((column, index) => (
@@ -176,6 +176,9 @@ const User = () => {
           {item.roles.length > 0
             ? item.roles.map((role) => role.name).join(", ")
             : "No roles"}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
+          {item.partner_id}
         </td>
         <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
           <span
@@ -256,7 +259,7 @@ const User = () => {
                 <select
                   value={searchType}
                   onChange={(e) => setSearchType(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md mr-2"
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
                 >
                   <option value="username">Username</option>
                   <option value="email">Email</option>
@@ -266,7 +269,7 @@ const User = () => {
                   placeholder={`Search by ${searchType}`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="border border-gray-300 p-2 rounded-md"
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -293,7 +296,7 @@ const User = () => {
                 </tbody>
               </table>
             </div>
-            {pageCount > 0 && (
+            {pageCount > 1 && (
               <ReactPaginate
                 previousLabel={"Previous"}
                 nextLabel={"Next"}
