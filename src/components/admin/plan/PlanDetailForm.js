@@ -73,7 +73,10 @@ function PlanDetailForm({
           {renderInfoItem("Total Vehicles", plan.total_vehicle_used)}
           {/* {renderInfoItem("Total Routes", plan.total_routes)} */}
           {renderInfoItem("Status", getStatusBadge(plan.status))}
-          {renderInfoItem("Expected Date", new Date(plan.expected_date).toLocaleString())}
+          {renderInfoItem(
+            "Expected Date",
+            new Date(plan.expected_date).toLocaleString()
+          )}
           {renderInfoItem(
             "Created at",
             new Date(plan.created_at).toLocaleString()
@@ -108,6 +111,12 @@ function PlanDetailForm({
             `${formatNumber(plan.total_order_profit)} VND`
           )}
           {renderInfoItem("Total Profit", `${formatNumber(plan.profit)} VND`)}
+          {renderInfoItem(
+            "Efficiency",
+            plan.total_plan_value && plan.total_plan_value !== 0
+              ? `${(formatNumber(plan.profit / plan.total_plan_value) * 100)}%`
+              : "N/A"
+          )}
         </div>
       </div>
 

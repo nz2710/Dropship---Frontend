@@ -1,166 +1,185 @@
 import React, { useState, useRef } from "react";
-import ReactPaginate from "react-paginate";
+import Select from "react-select";
 import { useTableDragScroll } from "../../../hooks/useTableDragScroll";
 
 function CompletePlanForm({
-  routes,
-  currentPage,
-  pageCount,
+  selectedPlanForCompletion,
+  incompleteOrderIds,
+  setIncompleteOrderIds,
+  onCompleteConfirm,
   onClose,
-  onPageChange,
-  onCompletePlan,
 }) {
+  const [currentRouteIndex, setCurrentRouteIndex] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectAllOrders, setSelectAllOrders] = useState(false);
   const tableRef = useRef(null);
   const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } =
     useTableDragScroll(tableRef);
 
-  const [selectedRoutes, setSelectedRoutes] = useState({});
-  const [selectedOrders, setSelectedOrders] = useState({});
-  const [selectAll, setSelectAll] = useState(false);
-
-  const handleRouteSelect = (routeId) => {
-    setSelectedRoutes(prev => ({
-      ...prev,
-      [routeId]: !prev[routeId]
-    }));
-    setSelectedOrders(prev => ({
-      ...prev,
-      [routeId]: {}
-    }));
+  const handleOrderToggle = (orderId) => {
+    setIncompleteOrderIds((prev) =>
+      prev.includes(orderId)
+        ? prev.filter((id) => id !== orderId)
+        : [...prev, orderId]
+    );
   };
 
-  const handleOrderSelect = (routeId, orderId) => {
-    setSelectedOrders(prev => ({
-      ...prev,
-      [routeId]: {
-        ...prev[routeId],
-        [orderId]: !prev[routeId]?.[orderId]
-      }
-    }));
+  const routeOptions = selectedPlanForCompletion?.routes.map(
+    (route, index) => ({
+      value: index,
+      label: `Route ${route.route_id}`,
+    })
+  );
+
+  const handleRouteChange = (selectedOption) => {
+    setCurrentRouteIndex(selectedOption.value);
   };
 
-  const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    setSelectedRoutes({});
-    setSelectedOrders({});
-  };
+  const renderRouteOrdersTable = () => {
+    const currentRoute = selectedPlanForCompletion?.routes[currentRouteIndex];
+    const filteredOrders = currentRoute?.orders.filter(
+      (order) =>
+        order.code_order.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.customer_name &&
+          order.customer_name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (order.address &&
+          order.address.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
-  const handleComplete = () => {
-    const completedRoutes = routes.map(route => ({
-      route_id: route.id,
-      is_fully_completed: selectedRoutes[route.id] || selectAll,
-      completed_orders: selectedRoutes[route.id] || selectAll
-        ? route.orders.map(order => order.id)
-        : Object.keys(selectedOrders[route.id] || {}).filter(orderId => selectedOrders[route.id][orderId])
-    })).filter(route => route.is_fully_completed || route.completed_orders.length > 0);
-
-    onCompletePlan({
-      all_routes_completed: selectAll,
-      completed_routes: completedRoutes
-    });
+    return (
+      <div>
+        <div className="mb-4 flex justify-between items-center">
+          <input
+            type="text"
+            placeholder="Search by order code, customer name, or address"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-1/2"
+          />
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="selectAllOrders"
+              checked={selectAllOrders}
+              onChange={() => {
+                setSelectAllOrders(!selectAllOrders);
+                setIncompleteOrderIds(
+                  selectAllOrders
+                    ? []
+                    : currentRoute.orders.map((order) => order.id)
+                );
+              }}
+              className="mr-2 w-5 h-5"
+            />
+            <label htmlFor="selectAllOrders">Select all as incomplete</label>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <div
+            className="overflow-x-auto cursor-grab active:cursor-grabbing"
+            ref={tableRef}
+            onMouseDown={handleMouseDown}
+            onMouseLeave={handleMouseLeave}
+            onMouseUp={handleMouseUp}
+            onMouseMove={handleMouseMove}
+          >
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Incomplete
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Order Code
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Address
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredOrders.map((order) => (
+                  <tr key={order.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={incompleteOrderIds.includes(order.id)}
+                        onChange={() => handleOrderToggle(order.id)}
+                        className="w-5 h-5"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{order.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {order.code_order}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {order.customer_name || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {order.address || "N/A"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Complete Plan</h2>
-
-      <div className="mb-4 flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-700">Routes</h3>
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="selectAll"
-            checked={selectAll}
-            onChange={handleSelectAll}
-            className="form-checkbox h-5 w-5 text-blue-600 rounded"
-          />
-          <label htmlFor="selectAll" className="ml-2 text-sm text-gray-600">Select All Routes</label>
-        </div>
+    <div className="bg-white p-6 rounded-lg shadow-sm w-full mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Complete Plan</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            ></path>
+          </svg>
+        </button>
       </div>
-
-      <div
-        className="overflow-x-auto mb-6 border border-gray-200 rounded-lg shadow-sm"
-        ref={tableRef}
-        onMouseDown={handleMouseDown}
-        onMouseLeave={handleMouseLeave}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-      >
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Select</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route ID</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orders</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {routes.map((route) => (
-              <tr key={route.id} className="hover:bg-gray-50 transition-colors duration-150">
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <input
-                    type="checkbox"
-                    checked={selectedRoutes[route.id] || selectAll}
-                    onChange={() => handleRouteSelect(route.id)}
-                    disabled={selectAll}
-                    className="form-checkbox h-4 w-4 text-blue-600 rounded transition-all duration-150"
-                  />
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {route.id}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-2">
-                    {route.orders.map((order) => (
-                      <div key={order.id} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedRoutes[route.id] || selectAll || selectedOrders[route.id]?.[order.id]}
-                          onChange={() => handleOrderSelect(route.id, order.id)}
-                          disabled={selectedRoutes[route.id] || selectAll}
-                          className="form-checkbox h-3 w-3 text-blue-600 rounded mr-1 transition-all duration-150"
-                        />
-                        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
-                          {order.code_order || order.id}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {pageCount > 1 && (
-        <ReactPaginate
-          previousLabel={"←"}
-          nextLabel={"→"}
-          pageCount={pageCount}
-          onPageChange={onPageChange}
-          containerClassName={"flex justify-center items-center space-x-2 my-4"}
-          pageClassName={"px-3 py-1 rounded-md bg-gray-100 text-sm hover:bg-gray-200 transition-colors duration-150"}
-          previousClassName={"px-3 py-1 rounded-md bg-gray-100 text-sm hover:bg-gray-200 transition-colors duration-150"}
-          nextClassName={"px-3 py-1 rounded-md bg-gray-100 text-sm hover:bg-gray-200 transition-colors duration-150"}
-          activeClassName={"!bg-blue-500 text-white"}
-          disabledClassName={"opacity-50 cursor-not-allowed"}
-          forcePage={currentPage - 1}
-          pageRangeDisplayed={3}
-          marginPagesDisplayed={1}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Route:
+        </label>
+        <Select
+          options={routeOptions}
+          value={routeOptions[currentRouteIndex]}
+          onChange={handleRouteChange}
+          className="w-full"
         />
-      )}
-
+      </div>
+      {renderRouteOrdersTable()}
       <div className="flex justify-end mt-6 space-x-4">
         <button
-          onClick={handleComplete}
-          className="px-4 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-150"
+          onClick={onCompleteConfirm}
+          className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
         >
-          Complete Selected
+          Complete Plan
         </button>
         <button
           onClick={onClose}
-          className="px-4 py-2 bg-gray-200 text-gray-800 text-sm rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition-colors duration-150"
+          className="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
         >
           Cancel
         </button>

@@ -8,6 +8,7 @@ import { getSortIcon, handleSort, formatNumber } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import CommissionDetailForm from "../../components/admin/commission/CommissionDetailForm";
 
 function MonthlyCommissionStats() {
   const [cookies] = useCookies(["token"]);
@@ -17,6 +18,9 @@ function MonthlyCommissionStats() {
   const [currentPageData, setCurrentPageData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
+  const [selectedCommissionOrders, setSelectedCommissionOrders] = useState(null);
+  const [currentOrderPage, setCurrentOrderPage] = useState(1);
+  const [orderPageCount, setOrderPageCount] = useState(0);
   const dataPerPage = 10;
   const tableRef = useRef(null);
   const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } =
@@ -24,6 +28,8 @@ function MonthlyCommissionStats() {
 
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [filterType, setFilterType] = useState("month");
+  const [showDetailForm, setShowDetailForm] = useState(false);
+  const [selectedCommission, setSelectedCommission] = useState(null);
 
   const handleLoadData = useCallback(
     async (page = currentPage) => {
@@ -121,6 +127,84 @@ function MonthlyCommissionStats() {
     }
   };
 
+  const handleShowDetail = async (item) => {
+    try {
+      const url = new URL(
+        `${API_URL2}/api/admin/commission/${item.partner_id}?page=1&pageSize=5`
+      );
+      url.searchParams.append("year", selectedMonth.getFullYear());
+
+      if (filterType === "month") {
+        url.searchParams.append("month", selectedMonth.getMonth() + 1);
+      }
+
+      url.searchParams.append("filter_type", filterType);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setSelectedCommission(data.data);
+        setSelectedCommissionOrders(data.data.orders);
+        setCurrentOrderPage(data.current_page);
+        setOrderPageCount(data.last_page);
+        setShowDetailForm(true);
+      } else {
+        throw new Error("Failed to fetch commission details");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleOrderPageChange = async (selectedPage) => {
+    const currentPage = selectedPage.selected + 1;
+    try {
+      const url = new URL(
+        `${API_URL2}/api/admin/commission/${selectedCommission.partner_id}?page=${currentPage}&pageSize=5`
+      );
+      url.searchParams.append("year", selectedMonth.getFullYear());
+
+      if (filterType === "month") {
+        url.searchParams.append("month", selectedMonth.getMonth() + 1);
+      }
+
+      url.searchParams.append("filter_type", filterType);
+      const response = await fetch(url,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setSelectedCommissionOrders(data.data.orders);
+        setCurrentOrderPage(data.current_page);
+      } else {
+        throw new Error("Failed to fetch commission orders");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleCloseDetailForm = () => {
+    setSelectedCommission(null);
+    setShowDetailForm(false);
+  };
+
   const renderTableHeader = () => (
     <tr>
       {[
@@ -132,19 +216,25 @@ function MonthlyCommissionStats() {
         { label: "Bonus", key: "bonus" },
         { label: "Total Amount", key: "total_amount" },
         { label: "Order Count", key: "order_count" },
-      ].map((column) => (
+        { label: "Operation", key: null },
+      ].map((column, index) => (
         <th
           key={column.label}
-          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer border-r border-gray-200"
+          className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer ${
+            index !== 8 ? "border-r border-gray-200" : ""
+          }`}
           onClick={() =>
+            column.key &&
             handleSort(column.key, orderBy, sortBy, setOrderBy, setSortBy)
           }
         >
           <div className="flex items-center">
             <span>{column.label}</span>
-            <span className="ml-1">
-              {getSortIcon(column.key, orderBy, sortBy)}
-            </span>
+            {column.key && (
+              <span className="ml-1">
+                {getSortIcon(column.key, orderBy, sortBy)}
+              </span>
+            )}
           </div>
         </th>
       ))}
@@ -175,8 +265,29 @@ function MonthlyCommissionStats() {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
           {formatNumber(item.total_amount)}
         </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
           {item.order_count}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <button
+            onClick={() => handleShowDetail(item)}
+            className="text-blue-600 hover:text-blue-900"
+            title="View Details"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+              <path
+                fillRule="evenodd"
+                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
         </td>
       </tr>
     ));
@@ -185,73 +296,90 @@ function MonthlyCommissionStats() {
     <div className="flex justify-center bg-white p-3 m-3 rounded-md">
       <ToastContainer />
       <div className="w-full">
-        <div className="mb-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <select
-              value={filterType}
-              onChange={handleFilterTypeChange}
-              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
+        {!showDetailForm ? (
+          <>
+            <div className="mb-4 flex justify-between items-center">
+              <div className="flex items-center">
+                <select
+                  value={filterType}
+                  onChange={handleFilterTypeChange}
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
+                >
+                  <option value="month">Month</option>
+                  <option value="year">Year</option>
+                </select>
+                <DatePicker
+                  selected={selectedMonth}
+                  onChange={handleMonthChange}
+                  dateFormat={filterType === "month" ? "MM/yyyy" : "yyyy"}
+                  showMonthYearPicker={filterType === "month"}
+                  showYearPicker={filterType === "year"}
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
+                />
+                <input
+                  type="text"
+                  placeholder="Search by partner name"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                onClick={handleUpdateStats}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Update Stats
+              </button>
+            </div>
+            <div
+              className="overflow-x-auto cursor-grab active:cursor-grabbing"
+              ref={tableRef}
+              onMouseDown={handleMouseDown}
+              onMouseLeave={handleMouseLeave}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
             >
-              <option value="month">Month</option>
-              <option value="year">Year</option>
-            </select>
-            <DatePicker
-              selected={selectedMonth}
-              onChange={handleMonthChange}
-              dateFormat={filterType === "month" ? "MM/yyyy" : "yyyy"}
-              showMonthYearPicker={filterType === "month"}
-              showYearPicker={filterType === "year"}
-              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
-            />
-            <input
-              type="text"
-              placeholder="Search by partner name"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            onClick={handleUpdateStats}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Update Stats
-          </button>
-        </div>
-        <div
-          className="overflow-x-auto cursor-grab active:cursor-grabbing"
-          ref={tableRef}
-          onMouseDown={handleMouseDown}
-          onMouseLeave={handleMouseLeave}
-          onMouseUp={handleMouseUp}
-          onMouseMove={handleMouseMove}
-        >
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">{renderTableHeader()}</thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {renderTableBody()}
-            </tbody>
-          </table>
-        </div>
-        {pageCount > 1 && (
-          <ReactPaginate
-            previousLabel={"Previous"}
-            nextLabel={"Next"}
-            pageCount={pageCount}
-            onPageChange={handlePageChange}
-            containerClassName={
-              "flex justify-center items-center space-x-2 mt-4"
-            }
-            pageClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
-            previousClassName={
-              "px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
-            }
-            nextClassName={"px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"}
-            activeClassName={"!bg-blue-500 text-white"}
-            disabledClassName={"opacity-50 cursor-not-allowed"}
-            forcePage={currentPage - 1}
-            pageRangeDisplayed={3}
-            marginPagesDisplayed={1}
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">{renderTableHeader()}</thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {renderTableBody()}
+                </tbody>
+              </table>
+            </div>
+            {pageCount > 1 && (
+              <ReactPaginate
+                previousLabel={"Previous"}
+                nextLabel={"Next"}
+                pageCount={pageCount}
+                onPageChange={handlePageChange}
+                containerClassName={
+                  "flex justify-center items-center space-x-2 mt-4"
+                }
+                pageClassName={
+                  "px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
+                }
+                previousClassName={
+                  "px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
+                }
+                nextClassName={
+                  "px-3 py-2 rounded-md bg-gray-100 hover:bg-gray-200"
+                }
+                activeClassName={"!bg-blue-500 text-white"}
+                disabledClassName={"opacity-50 cursor-not-allowed"}
+                forcePage={currentPage - 1}
+                pageRangeDisplayed={3}
+                marginPagesDisplayed={1}
+              />
+            )}
+          </>
+        ) : (
+          <CommissionDetailForm
+            commission={selectedCommission}
+            orders={selectedCommissionOrders}
+            currentPage={currentOrderPage}
+            pageCount={orderPageCount}
+            onClose={handleCloseDetailForm}
+            onPageChange={handleOrderPageChange}
           />
         )}
       </div>

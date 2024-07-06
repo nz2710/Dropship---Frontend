@@ -146,15 +146,7 @@ function PartnerDetailForm({
             />
           )}
           {renderInfoItem("Number of Orders", partner.number_of_order)}
-          {renderInfoItem("Discount", `${partner.discount}%`,
-            <input
-              type="number"
-              name="discount"
-              value={formData.discount}
-              onChange={handleChange}
-              className="border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-            />
-          )}
+          {renderInfoItem("Bonus", `${formatNumber(partner.bonus)} VND`)}
           {renderInfoItem("Revenue", `${formatNumber(partner.revenue)} VND`)}
           {renderInfoItem("Commission", `${formatNumber(partner.commission)} VND`)}
           {renderInfoItem("Updated At", new Date(partner.updated_at).toLocaleString())}
@@ -173,7 +165,7 @@ function PartnerDetailForm({
         <table className="w-full border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              {["ID", "Code Order", "Customer Name", "Phone", "Price", "Discount", "Address", "Status"].map((header) => (
+              {["ID", "Code Order", "Customer Name", "Phone", "Price", "Commission", "Address", "Status"].map((header) => (
                 <th key={header} className="p-2 text-left text-sm font-semibold text-gray-600 border-b">
                   {header}
                 </th>
@@ -187,8 +179,8 @@ function PartnerDetailForm({
                 <td className="p-2 border-b">{order.code_order}</td>
                 <td className="p-2 border-b">{order.customer_name}</td>
                 <td className="p-2 border-b">{order.phone}</td>
-                <td className="p-2 border-b">{formatNumber(order.price)} VND</td>
-                <td className="p-2 border-b">{order.discount}%</td>
+                <td className="p-2 border-b">{formatNumber(order.price)}</td>
+                <td className="p-2 border-b">{formatNumber(order.commission)}</td>
                 <td className="p-2 border-b">{order.address}</td>
                 <td className="p-2 border-b">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
