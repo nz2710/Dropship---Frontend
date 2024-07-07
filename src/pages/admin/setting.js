@@ -94,6 +94,7 @@ function Settings() {
         params.append("order_by", orderBy);
         params.append("sort_by", sortBy);
         params.append("page", page);
+        params.append("status", "Active");
         if (searchTerm) params.append("name", searchTerm);
         url += '?' + params.toString();
 
@@ -290,7 +291,7 @@ function Settings() {
             id="selectAllDepots"
             checked={selectAllDepots}
             onChange={() => setSelectAllDepots(!selectAllDepots)}
-            className="mr-2"
+            className="mr-2 w-5 h-5" // Increase checkbox size
           />
           <label htmlFor="selectAllDepots">Select all depots</label>
         </div>
@@ -343,6 +344,8 @@ function Settings() {
                           : [...prev, depot.id]
                       );
                     }}
+                    className="w-5 h-5"
+                    disabled={selectAllDepots} // Disable checkbox if "Select all" is checked
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{depot.id}</td>
@@ -486,7 +489,7 @@ function Settings() {
             id="selectAllOrders"
             checked={selectAllOrders}
             onChange={() => setSelectAllOrders(!selectAllOrders)}
-            className="mr-2"
+            className="mr-2 w-5 h-5" // Increase checkbox size
           />
           <label htmlFor="selectAllOrders">Select all orders</label>
         </div>
@@ -550,6 +553,8 @@ function Settings() {
                           : [...prev, order.id]
                       );
                     }}
+                    className="w-5 h-5"
+                    disabled={selectAllOrders} // Disable checkbox if "Select all" is checked
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">{order.id}</td>

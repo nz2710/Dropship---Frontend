@@ -5,6 +5,7 @@ import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PlanDetailForm from "../../components/admin/plan/PlanDetailForm";
+import CompletePlanForm from "../../components/admin/plan/CompletePlanForm";
 import {
   getSortIcon,
   handleSort,
@@ -28,6 +29,10 @@ function Plan() {
   const [selectedPlanRoutes, setSelectedPlanRoutes] = useState(null);
   const dataPerPage = 10;
   const [cookies] = useCookies(["token"]);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [selectedPlanForCompletion, setSelectedPlanForCompletion] =
+    useState(null);
+  const [incompleteOrderIds, setIncompleteOrderIds] = useState([]);
 
   const tableRef = useRef(null);
   const { handleMouseDown, handleMouseLeave, handleMouseUp, handleMouseMove } =
@@ -144,29 +149,58 @@ function Plan() {
   };
 
   const handleCompletePlan = async (planId) => {
-    if (window.confirm("Are you sure you want to complete this plan?")) {
-      try {
-        let response = await fetch(
-          `/api/management/admin/plans/${planId}/complete`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              Authorization: "Bearer " + cookies.token,
-            },
-          }
-        );
-        if (response.status === 200) {
-          const result = await response.json();
-          toast.success(result.message);
-          handleLoadData(currentPage);
-        } else {
-          throw new Error("Failed to complete plan");
+    try {
+      const response = await fetch(
+        `${API_URL2}/api/admin/plans/${planId}/routes`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
         }
-      } catch (error) {
-        toast.error("Error: " + error.message);
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedPlanForCompletion(data);
+        setShowCompleteModal(true);
+      } else {
+        throw new Error("Failed to fetch plan routes");
       }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  const handleCompleteConfirm = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL2}/api/admin/plans/${selectedPlanForCompletion.plan_id}/complete`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: "Bearer " + cookies.token,
+          },
+          body: JSON.stringify({ incomplete_order_ids: incompleteOrderIds }),
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(result.message);
+        handleLoadData(currentPage);
+        setShowCompleteModal(false);
+        setSelectedPlanForCompletion(null);
+        setIncompleteOrderIds([]);
+      } else {
+        throw new Error("Failed to complete plan");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
     }
   };
 
@@ -377,21 +411,21 @@ function Plan() {
       </tr>
     ));
 
-    return (
-      <div className="flex justify-center bg-white p-3 m-3 rounded-md">
-        <ToastContainer
-          position="top-center"
-          autoClose={3000}
-          hideProgressBar
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
-        <div className="w-full">
-          {!showDetailForm ? (
+  return (
+    <div className="flex justify-center bg-white p-3 m-3 rounded-md">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      <div className="w-full">
+        {!showCompleteModal && !showDetailForm ? (
           <>
             <div className="mb-4 flex justify-between">
               <div className="flex-grow flex items-center">
@@ -453,6 +487,14 @@ function Plan() {
               />
             )}
           </>
+        ) : showCompleteModal ? (
+          <CompletePlanForm
+            selectedPlanForCompletion={selectedPlanForCompletion}
+            incompleteOrderIds={incompleteOrderIds}
+            setIncompleteOrderIds={setIncompleteOrderIds}
+            onCompleteConfirm={handleCompleteConfirm}
+            onClose={() => setShowCompleteModal(false)}
+          />
         ) : (
           <PlanDetailForm
             plan={selectedPlan}
