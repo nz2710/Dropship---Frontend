@@ -56,16 +56,18 @@ function OrderPage() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/order`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
+        let url = `/api/management/admin/order`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
   
         if (searchTerm) {
-          url.searchParams.append(searchType, searchTerm);
+          params.append(searchType, searchTerm);
         }
-        const response = await fetch(url, {
+        url += '?' + params.toString();
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -98,8 +100,8 @@ function OrderPage() {
 
   const handleConfirmOrder = async (orderId) => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/order/${orderId}/confirm`,
+      let response = await fetch(
+        `/api/management/admin/order/${orderId}/confirm`,
         {
           method: "POST",
           headers: {
@@ -124,8 +126,8 @@ function OrderPage() {
 
   const handleCancelOrder = async (orderId) => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/order/${orderId}/cancel`,
+      let response = await fetch(
+        `/api/management/admin/order/${orderId}/cancel`,
         {
           method: "POST",
           headers: {
@@ -150,8 +152,8 @@ function OrderPage() {
 
   const handleShowDetail = async (item) => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/order/${item.id}?page=1&pageSize=5`,
+      let response = await fetch(
+        `/api/management/admin/order/${item.id}?page=1&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -180,8 +182,8 @@ function OrderPage() {
   const handleProductPageChange = async (selectedPage) => {
     const currentPage = selectedPage.selected + 1;
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/order/${selectedOrder.id}?page=${currentPage}&pageSize=5`,
+      let response = await fetch(
+        `/api/management/admin/order/${selectedOrder.id}?page=${currentPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -212,8 +214,8 @@ function OrderPage() {
   const refreshOrderData = useCallback(
     async (orderId) => {
       try {
-        const response = await fetch(
-          `${API_URL2}/api/admin/order/${orderId}?page=1&pageSize=5`,
+        let response = await fetch(
+          `/api/management/admin/order/${orderId}?page=1&pageSize=5`,
           {
             method: "GET",
             headers: {
@@ -259,7 +261,7 @@ function OrderPage() {
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
-        const response = await fetch(`${API_URL2}/api/admin/getProduct`, {
+        let response = await fetch(`/api/management/admin/getProduct`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -428,7 +430,7 @@ function OrderPage() {
             <button
               onClick={() =>
                 handleDelete(
-                  `${API_URL2}/api/admin/order`,
+                  `/api/management/admin/order`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

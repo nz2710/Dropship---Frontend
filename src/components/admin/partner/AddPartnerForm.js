@@ -15,7 +15,7 @@ function AddPartnerForm({ onClose, onPartnerAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/api/admin/partner`, {
+      let response = await fetch(`/api/management/admin/partner`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

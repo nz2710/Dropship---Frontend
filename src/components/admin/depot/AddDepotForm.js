@@ -8,7 +8,7 @@ function AddDepotForm({ setShowModal, handleSubmit, handleInputChange }) {
     const input = event.target.value;
     handleInputChange({ target: { name: "address", value: input } });
     if (input.length > 2) {
-      const response = await fetch(
+      let response = await fetch(
         `https://rsapi.goong.io/Place/AutoComplete?api_key=${goongApiKey}&input=${encodeURIComponent(
           input
         )}`

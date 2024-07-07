@@ -43,16 +43,18 @@ function PartnerPage() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/partner`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
+        let url = `/api/management/admin/partner`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
   
         if (searchTerm) {
-          url.searchParams.append(searchType, searchTerm);
+          params.append(searchType, searchTerm);
         }
-        const response = await fetch(url, {
+        url += '?' + params.toString();
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -97,8 +99,8 @@ function PartnerPage() {
 
   const handleShowDetail = async (item) => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/partner/${item.id}?page=1&pageSize=5`,
+      let response = await fetch(
+        `/api/management/admin/partner/${item.id}?page=1&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -127,8 +129,8 @@ function PartnerPage() {
   const handleOrderPageChange = async (selectedPage) => {
     const currentPage = selectedPage.selected + 1;
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/partner/${selectedPartner.id}?page=${currentPage}&pageSize=5`,
+      let response = await fetch(
+        `/api/management/admin/partner/${selectedPartner.id}?page=${currentPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -159,8 +161,8 @@ function PartnerPage() {
   const handlePartnerUpdated = async (updatedPartner) => {
     try {
       setSelectedPartner(updatedPartner);
-      const response = await fetch(
-        `${API_URL2}/api/admin/partner/${updatedPartner.id}?page=${currentOrderPage}&pageSize=5`,
+      let response = await fetch(
+        `/api/management/admin/partner/${updatedPartner.id}?page=${currentOrderPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -283,7 +285,7 @@ function PartnerPage() {
             <button
               onClick={() =>
                 handleDelete(
-                  `${API_URL2}/api/admin/partner`,
+                  `/api/management/admin/partner`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

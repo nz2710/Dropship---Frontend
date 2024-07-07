@@ -36,12 +36,14 @@ function CommissionRules() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/rule`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
-        const response = await fetch(url, {
+        let url = `/api/management/admin/rule`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
+        url += '?' + params.toString();
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -125,7 +127,7 @@ function CommissionRules() {
 
   const handleSaveEdit = async () => {
     try {
-      const response = await fetch(`${API_URL2}/api/admin/rule/${editingId}`, {
+      let response = await fetch(`/api/management/admin/rule/${editingId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -242,7 +244,7 @@ function CommissionRules() {
                 <button
                   onClick={() =>
                     handleDelete(
-                      `${API_URL2}/api/admin/rule`,
+                      `/api/management/admin/rule`,
                       item.id,
                       cookies.token,
                       () => handleLoadData(currentPage)

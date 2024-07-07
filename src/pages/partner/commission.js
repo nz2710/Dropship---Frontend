@@ -24,11 +24,11 @@ function PartnerCommissionStats() {
 
   const handleLoadData = useCallback(async () => {
     try {
-      let url = `${API_URL2}/api/partner/stats?year=${selectedYear}&filter_type=${filterType}&order_by=${orderBy}&sort_by=${sortBy}`;
+      let url = `/api/management/partner/stats?year=${selectedYear}&filter_type=${filterType}&order_by=${orderBy}&sort_by=${sortBy}`;
       if (filterType === "month") {
         url += `&month=${selectedMonth}`;
       }
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

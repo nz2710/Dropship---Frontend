@@ -27,7 +27,7 @@ export const handleSort = (column, orderBy, sortBy, setOrderBy, setSortBy) => {
 export const handleDelete = async (url, id, token, onSuccess) => {
   if (window.confirm("Are you sure you want to delete this?")) {
   try {
-    const response = await fetch(`${url}/${id}`, {
+    let response = await fetch(`${url}/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

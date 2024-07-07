@@ -38,16 +38,19 @@ const User = () => {
 
   const handleLoadData = useCallback(async () => {
     try {
-      const url = new URL(`${API_URL}/api/admin/users`);
-      url.searchParams.append("pageSize", dataPerPage);
-      url.searchParams.append("page", currentPage);
-      url.searchParams.append("order_by", orderBy);
-      url.searchParams.append("sort_by", sortBy);
+      let url = `/api/user/admin/users`;
+      let params = new URLSearchParams();
+      params.append("pageSize", dataPerPage);
+      params.append("page", currentPage);
+      params.append("order_by", orderBy);
+      params.append("sort_by", sortBy);
   
       if (searchTerm) {
-        url.searchParams.append(searchType, searchTerm);
+        params.append(searchType, searchTerm);
       }
-      const response = await fetch(url, {
+      url += '?' + params.toString();
+
+      let response = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -82,7 +85,7 @@ const User = () => {
 
   const handleBan = async (item) => {
     try {
-      const response = await fetch(`${API_URL}/api/admin/ban/user/${item.id}`, {
+      let response = await fetch(`/api/user/admin/ban/user/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +106,7 @@ const User = () => {
 
   const handleUnBan = async (item) => {
     try {
-      const response = await fetch(`${API_URL}/api/admin/unban/user/${item.id}`, {
+      let response = await fetch(`/api/user/admin/unban/user/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -211,7 +214,7 @@ const User = () => {
             <button
               onClick={() =>
                 handleDelete(
-                  `${API_URL}/api/admin/user`,
+                  `/api/user/admin/user`,
                   item.id,
                   cookies.token,
                   handleLoadData

@@ -39,17 +39,20 @@ function Depot() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/depot`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
+        let url = `/api/management/admin/depot`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
 
         if (searchTerm) {
-          url.searchParams.append(searchType, searchTerm);
+          params.append(searchType, searchTerm);
         }
 
-        const response = await fetch(url, {
+        url += '?' + params.toString();
+
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -80,7 +83,7 @@ function Depot() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/api/admin/depot`, {
+      let response = await fetch(`/api/management/admin/depot`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,8 +107,8 @@ function Depot() {
 
   const handleSaveDepot = async () => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/depot/${selectedDepot.id}`,
+      let response = await fetch(
+        `/api/management/admin/depot/${selectedDepot.id}`,
         {
           method: "PUT",
           headers: {
@@ -230,7 +233,7 @@ function Depot() {
             <button
               onClick={() =>
                 handleDelete(
-                  `${API_URL2}/api/admin/depot`,
+                  `/api/management/admin/depot`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

@@ -99,7 +99,7 @@ function OrderDetailForm({
         })),
       };
 
-      const response = await fetch(`${API_URL2}/api/admin/order/${order.id}`, {
+      let response = await fetch(`/api/management/admin/order/${order.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -23,7 +23,7 @@ function AddProductForm({ onClose, onProductAdded }) {
       formData.append("quantity", quantity);
       formData.append("image", image || "");
 
-      const response = await fetch(`${API_URL2}/api/admin/product`, {
+      let response = await fetch(`/api/management/admin/product`, {
         method: "POST",
         headers: {
           Accept: "application/json",

@@ -17,7 +17,7 @@ function AddVehicleForm({ onClose, onVehicleAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/api/admin/vehicle`, {
+      let response = await fetch(`/api/management/admin/vehicle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
