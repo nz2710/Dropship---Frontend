@@ -19,7 +19,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   const handleAddressInput = async (event) => {
     const input = event.target.value;
     if (input.length > 2) {
-      const response = await fetch(
+      let response = await fetch(
         `https://rsapi.goong.io/Place/AutoComplete?api_key=${goongApiKey}&input=${encodeURIComponent(
           input
         )}`
@@ -39,7 +39,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API_URL2}/api/partner/getProducts`, {
+        let response = await fetch(`/api/management/partner/getProducts`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -119,7 +119,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/api/partner/orders`, {
+      let response = await fetch(`/api/management/partner/orders`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

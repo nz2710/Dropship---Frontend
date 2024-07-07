@@ -37,16 +37,19 @@ function Product() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/partner/products`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
+        let url = `/api/management/partner/products`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
   
         if (searchTerm) {
-          url.searchParams.append(searchType, searchTerm);
+          params.append(searchType, searchTerm);
         }
-        const response = await fetch(url, {
+
+        url += '?' + params.toString();
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -83,7 +86,7 @@ function Product() {
 
   const handleShowDetail = async (item) => {
     try {
-      const response = await fetch(`${API_URL2}/api/partner/products/${item.id}`, {
+      let response = await fetch(`/api/management/partner/products/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

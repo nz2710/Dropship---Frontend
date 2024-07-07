@@ -17,7 +17,7 @@ const AddUserForm = ({ onClose, onUserAdded }) => {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        const response = await fetch(`${API_URL2}/api/admin/getPartner`, {
+        let response = await fetch(`/api/management/admin/getPartner`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -49,7 +49,7 @@ const AddUserForm = ({ onClose, onUserAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL}/api/admin/create`, {
+      let response = await fetch(`/api/user/admin/create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${cookies.token}`,

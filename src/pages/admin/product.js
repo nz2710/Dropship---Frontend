@@ -40,16 +40,18 @@ function Product() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/product`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
+        let url = `/api/management/admin/product`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
   
         if (searchTerm) {
-          url.searchParams.append(searchType, searchTerm);
+          params.append(searchType, searchTerm);
         }
-        const response = await fetch(url, {
+        url += '?' + params.toString();
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -90,7 +92,7 @@ function Product() {
 
   const handleShowDetail = async (item) => {
     try {
-      const response = await fetch(`${API_URL2}/api/admin/product/${item.id}`, {
+      let response = await fetch(`/api/management/admin/product/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -118,8 +120,8 @@ function Product() {
 
   const handleProductUpdated = async (updatedProduct) => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/product/${updatedProduct.id}`,
+      let response = await fetch(
+        `/api/management/admin/product/${updatedProduct.id}`,
         {
           method: "GET",
           headers: {
@@ -237,7 +239,7 @@ function Product() {
             <button
               onClick={() =>
                 handleDelete(
-                  `${API_URL2}/api/admin/product`,
+                  `/api/management/admin/product`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

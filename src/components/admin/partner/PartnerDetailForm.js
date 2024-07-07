@@ -31,8 +31,8 @@ function PartnerDetailForm({
 
   const handleSave = async () => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/partner/${partner.id}`,
+      let response = await fetch(
+        `/api/management/admin/partner/${partner.id}`,
         {
           method: "PUT",
           headers: {

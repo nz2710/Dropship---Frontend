@@ -99,8 +99,8 @@ function OrderDetailForm({
         })),
       };
 
-      const response = await fetch(
-        `${API_URL2}/api/partner/orders/${order.id}`,
+      let response = await fetch(
+        `/api/management/partner/orders/${order.id}`,
         {
           method: "PUT",
           headers: {

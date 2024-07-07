@@ -19,8 +19,8 @@ function VehicleDetailForm({ vehicle, onClose, onVehicleUpdated }) {
 
   const handleSave = async () => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/vehicle/${vehicle.id}`,
+      let response = await fetch(
+        `/api/management/admin/vehicle/${vehicle.id}`,
         {
           method: "PUT",
           headers: {

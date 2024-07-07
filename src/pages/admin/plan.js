@@ -46,16 +46,18 @@ function Plan() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/routing`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
+        let url = `/api/management/admin/routing`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
 
         if (searchTerm) {
-          url.searchParams.append(searchType, searchTerm);
+          params.append(searchType, searchTerm);
         }
-        const response = await fetch(url, {
+        url += '?' + params.toString();
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -92,8 +94,8 @@ function Plan() {
 
   const handleShowDetail = async (item) => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/routing/${item.id}?page=1&pageSize=10`,
+      let response = await fetch(
+        `/api/management/admin/routing/${item.id}?page=1&pageSize=10`,
         {
           method: "GET",
           headers: {
@@ -121,8 +123,8 @@ function Plan() {
   const handleConfirm = async (planId) => {
     if (window.confirm("Are you sure you want to confirm this plan?")) {
       try {
-        const response = await fetch(
-          `${API_URL2}/api/admin/plans/${planId}/confirm`,
+        let response = await fetch(
+          `/api/management/admin/plans/${planId}/confirm`,
           {
             method: "PUT",
             headers: {
@@ -226,8 +228,8 @@ function Plan() {
   const handleRoutePageChange = async (selectedPage) => {
     const currentPage = selectedPage.selected + 1;
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/routing/${selectedPlan.id}?page=${currentPage}&pageSize=10`,
+      let response = await fetch(
+        `/api/management/admin/routing/${selectedPlan.id}?page=${currentPage}&pageSize=10`,
         {
           method: "GET",
           headers: {
@@ -382,7 +384,7 @@ function Plan() {
             <button
               onClick={() =>
                 handleDelete(
-                  `${API_URL2}/api/admin/routing`,
+                  `/api/management/admin/routing`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

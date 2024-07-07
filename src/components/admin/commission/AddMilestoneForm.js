@@ -11,7 +11,7 @@ function AddMilestoneForm({ onClose, onMilestoneAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${API_URL2}/api/admin/rule`, {
+      let response = await fetch(`/api/management/admin/rule`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

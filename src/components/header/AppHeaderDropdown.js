@@ -26,7 +26,7 @@ const AppHeaderDropdown = () => {
 
   const logout = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/logout`, {
+      let response = await fetch(`/api/user/logout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${cookies.token}`,

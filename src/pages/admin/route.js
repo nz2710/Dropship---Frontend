@@ -18,7 +18,7 @@ function Route() {
 
   const fetchRouteDetails = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL2}/api/admin/route/${id}`, {
+      let response = await fetch(`/api/management/admin/route/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -105,12 +105,12 @@ function Route() {
     };
 
     const getDirection = async (startPoint, endPoint) => {
-      const url = `https://rsapi.goong.io/Direction?origin=${startPoint.join(
+      let url = `https://rsapi.goong.io/Direction?origin=${startPoint.join(
         ","
       )}&destination=${endPoint.join(
         ","
       )}&vehicle=car&api_key=sAOS9801oH13hSZORoMX3EZy2WzCbRSPWakuMjv9`;
-      const response = await fetch(url);
+      let response = await fetch(url);
       return await response.json();
     };
 

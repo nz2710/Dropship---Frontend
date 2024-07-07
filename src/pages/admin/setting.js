@@ -53,15 +53,17 @@ function Settings() {
   const fetchDepots = useCallback(
     async (page = 1) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/depot`);
-        url.searchParams.append("pageSize", 10);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
-        url.searchParams.append("status", "Active");
-        if (searchTerm) url.searchParams.append("name", searchTerm);
+        let url = `/api/management/admin/depot`;
+        let params = new URLSearchParams();
+        params.append("pageSize", 10);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
+        params.append("status", "Active");
+        if (searchTerm) params.append("name", searchTerm);
+        url += '?' + params.toString();
 
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -86,15 +88,17 @@ function Settings() {
   const fetchVehicles = useCallback(
     async (page = 1) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/vehicle`);
-        url.searchParams.append("pageSize", 10);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
-        url.searchParams.append("status", "Active");
-        if (searchTerm) url.searchParams.append("name", searchTerm);
+        let url = `/api/management/admin/vehicle`;
+        let params = new URLSearchParams();
+        params.append("pageSize", 10);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
+        params.append("status", "Active");
+        if (searchTerm) params.append("name", searchTerm);
+        url += '?' + params.toString();
 
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -119,15 +123,17 @@ function Settings() {
   const fetchOrders = useCallback(
     async (page = 1) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/order`);
-        url.searchParams.append("pageSize", 10);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
-        url.searchParams.append("status", "Pending");
-        if (searchTerm) url.searchParams.append("customer_name", searchTerm);
+        let url = `/api/management/admin/order`;
+        let params = new URLSearchParams();
+        params.append("pageSize", 10);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
+        params.append("status", "Pending");
+        if (searchTerm) params.append("customer_name", searchTerm);
+        url += '?' + params.toString();
 
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
@@ -174,8 +180,8 @@ function Settings() {
         data.depot_ids = depotIds;
       }
 
-      const response = await fetch(
-        `${API_URL2}/api/admin/routing/generateFile`,
+      let response = await fetch(
+        `/api/management/admin/routing/generateFile`,
         {
           method: "POST",
           headers: {
@@ -193,9 +199,9 @@ function Settings() {
         // const result = await response.json();
         toast.success("Settings successfully saved.");
         // Redirect or handle success as needed
-        setTimeout(() => {
-          window.location.href = "/admin/plan";
-        }, 3000);
+        // setTimeout(() => {
+        //   window.location.href = "/admin/plan";
+        // }, 3000);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to save settings");

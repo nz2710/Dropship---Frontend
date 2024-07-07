@@ -34,24 +34,27 @@ function MonthlyCommissionStats() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        const url = new URL(`${API_URL2}/api/admin/commission`);
-        url.searchParams.append("pageSize", dataPerPage);
-        url.searchParams.append("order_by", orderBy);
-        url.searchParams.append("sort_by", sortBy);
-        url.searchParams.append("page", page);
-        url.searchParams.append("year", selectedMonth.getFullYear());
+        let url = `/api/management/admin/commission`;
+        let params = new URLSearchParams();
+        params.append("pageSize", dataPerPage);
+        params.append("order_by", orderBy);
+        params.append("sort_by", sortBy);
+        params.append("page", page);
+        params.append("year", selectedMonth.getFullYear());
 
         if (filterType === "month") {
-          url.searchParams.append("month", selectedMonth.getMonth() + 1);
+          params.append("month", selectedMonth.getMonth() + 1);
         }
 
-        url.searchParams.append("filter_type", filterType);
+        params.append("filter_type", filterType);
 
         if (searchTerm) {
-          url.searchParams.append("search", searchTerm);
+          params.append("search", searchTerm);
         }
 
-        const response = await fetch(url, {
+        url += '?' + params.toString();
+
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -104,8 +107,8 @@ function MonthlyCommissionStats() {
 
   const handleUpdateStats = async () => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/commission/update-monthly-stats`,
+      let response = await fetch(
+        `/api/management/admin/commission/update-monthly-stats`,
         {
           method: "POST",
           headers: {
