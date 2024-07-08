@@ -45,7 +45,7 @@ const Logindiv = () => {
       let redirectPath = "/admin/dashboard"; // Đường dẫn mặc định cho admin
   
       if (userRoles.some((role) => role.name === "partner")) {
-        redirectPath = "/partner/orders"; // Đường dẫn cho partner
+        redirectPath = "/partner/dashboard"; // Đường dẫn cho partner
       }
   
       navigate(redirectPath);
