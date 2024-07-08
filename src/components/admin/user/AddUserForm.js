@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useCookies } from "react-cookie";
-import { API_URL, API_URL2 } from "../../../utils/constant";
 import { toast } from "react-toastify";
 import Select from 'react-select';
 

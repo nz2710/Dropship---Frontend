@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { API_URL2 } from "../../../utils/constant";
 import { useCookies } from "react-cookie";
 import ReactPaginate from "react-paginate";
 import { toast } from "react-toastify";

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import AreaChart from "../../components/admin/chart/AreaChart";
 import DatePicker from "react-datepicker";

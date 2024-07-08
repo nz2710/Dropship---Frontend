@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactPaginate from "react-paginate";
-import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,7 +17,8 @@ function MonthlyCommissionStats() {
   const [currentPageData, setCurrentPageData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(0);
-  const [selectedCommissionOrders, setSelectedCommissionOrders] = useState(null);
+  const [selectedCommissionOrders, setSelectedCommissionOrders] =
+    useState(null);
   const [currentOrderPage, setCurrentOrderPage] = useState(1);
   const [orderPageCount, setOrderPageCount] = useState(0);
   const dataPerPage = 10;
@@ -132,18 +132,20 @@ function MonthlyCommissionStats() {
 
   const handleShowDetail = async (item) => {
     try {
-      const url = new URL(
-        `${API_URL2}/api/admin/commission/${item.partner_id}?page=1&pageSize=5`
-      );
-      url.searchParams.append("year", selectedMonth.getFullYear());
+      let url = `/api/management/admin/commission/${item.partner_id}`;
+      let params = new URLSearchParams();
+      params.append("page", 1);
+      params.append("pageSize", 5);
+      params.append("year", selectedMonth.getFullYear());
 
       if (filterType === "month") {
-        url.searchParams.append("month", selectedMonth.getMonth() + 1);
+        params.append("month", selectedMonth.getMonth() + 1);
       }
 
-      url.searchParams.append("filter_type", filterType);
+      params.append("filter_type", filterType);
+      url += '?' + params.toString();
 
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -170,26 +172,26 @@ function MonthlyCommissionStats() {
   const handleOrderPageChange = async (selectedPage) => {
     const currentPage = selectedPage.selected + 1;
     try {
-      const url = new URL(
-        `${API_URL2}/api/admin/commission/${selectedCommission.partner_id}?page=${currentPage}&pageSize=5`
-      );
-      url.searchParams.append("year", selectedMonth.getFullYear());
+      let url = `/api/management/admin/commission/${selectedCommission.partner_id}`
+      let params = new URLSearchParams();
+      params.append("page", currentPage);
+      params.append("pageSize", 5);
+      params.append("year", selectedMonth.getFullYear());
 
       if (filterType === "month") {
-        url.searchParams.append("month", selectedMonth.getMonth() + 1);
+        params.append("month", selectedMonth.getMonth() + 1);
       }
 
-      url.searchParams.append("filter_type", filterType);
-      const response = await fetch(url,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: "Bearer " + cookies.token,
-          },
-        }
-      );
+      params.append("filter_type", filterType);
+      url += '?' + params.toString();
+      let response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + cookies.token,
+        },
+      });
 
       if (response.status === 200) {
         const data = await response.json();

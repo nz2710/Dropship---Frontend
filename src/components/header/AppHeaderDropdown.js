@@ -1,7 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCookies } from "react-cookie";
-import { API_URL } from '../../utils/constant';
 import {
   CAvatar,
   CDropdown,

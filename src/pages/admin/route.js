@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { API_URL2 } from "../../utils/constant";
 import { useParams, useLocation } from "react-router-dom";
 import goongjs from "@goongmaps/goong-js";
 import polyline from "@mapbox/polyline";

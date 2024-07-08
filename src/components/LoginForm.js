@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
-import { API_URL } from "../utils/constant";
+
 
 const Logindiv = () => {
   const [username, setUserName] = useState("");
