@@ -25,7 +25,7 @@ const Logindiv = () => {
       setErrosMess("Please enter username and password");
       return;
     }
-    let response = await fetch(`${API_URL}/api/login`, {
+    let response = await fetch(`/api/user/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
