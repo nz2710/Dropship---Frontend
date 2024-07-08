@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { API_URL2 } from "../../../utils/constant";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 

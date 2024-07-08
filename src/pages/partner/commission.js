@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactPaginate from "react-paginate";
-import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -33,11 +32,11 @@ function PartnerCommissionStats() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `${API_URL2}/api/partner/stats?year=${selectedYear}&filter_type=${filterType}&order_by=${orderBy}&sort_by=${sortBy}&page=${page}&pageSize=${pageSize}`;
+        let url = `/api/management/partner/stats?year=${selectedYear}&filter_type=${filterType}&order_by=${orderBy}&sort_by=${sortBy}&page=${page}&pageSize=${pageSize}`;
         if (filterType === "month") {
           url += `&month=${selectedMonth}`;
         }
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

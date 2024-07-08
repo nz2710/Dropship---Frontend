@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
 import { formatNumber } from '../../utils/commonUtils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { API_URL2 } from "../../utils/constant";
+
+
 
 const DashBoard = () => {
   const [cookies] = useCookies(['token']);
@@ -13,7 +14,7 @@ const DashBoard = () => {
     const fetchDashboardData = async () => {
       try {
 
-        const response = await fetch(`${API_URL2}/api/partner/dashboard-stats`, {
+        const response = await fetch(`/api/management/partner/dashboard-stats`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

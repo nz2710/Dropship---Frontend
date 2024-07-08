@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import ReactPaginate from "react-paginate";
 import { formatNumber } from "../../../utils/commonUtils";
 import { useTableDragScroll } from "../../../hooks/useTableDragScroll";
-import { API_URL2 } from "../../../utils/constant";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import Select from "react-select";

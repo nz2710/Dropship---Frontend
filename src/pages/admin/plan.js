@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactPaginate from "react-paginate";
-import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -150,8 +149,8 @@ function Plan() {
 
   const handleCompletePlan = async (planId) => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/plans/${planId}/routes`,
+      let response = await fetch(
+        `/api/management/admin/plans/${planId}/routes`,
         {
           method: "GET",
           headers: {
@@ -176,8 +175,8 @@ function Plan() {
 
   const handleCompleteConfirm = async () => {
     try {
-      const response = await fetch(
-        `${API_URL2}/api/admin/plans/${selectedPlanForCompletion.plan_id}/complete`,
+      let response = await fetch(
+        `/api/management/admin/plans/${selectedPlanForCompletion.plan_id}/complete`,
         {
           method: "PUT",
           headers: {

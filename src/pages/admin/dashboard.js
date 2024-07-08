@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { API_URL2 } from "../../utils/constant";
 import { useCookies } from "react-cookie";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -142,11 +141,11 @@ const DashBoard = () => {
   const fetchAverageStats = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `${API_URL2}/api/admin/dashboard/average?year=${year}&filter_type=${filterType}`;
+        let url = `/api/management/admin/dashboard/average?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -177,11 +176,11 @@ const DashBoard = () => {
   const fetchTransportationMetrics = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `${API_URL2}/api/admin/dashboard/metric?year=${year}&filter_type=${filterType}`;
+        let url = `/api/management/admin/dashboard/metric?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -389,11 +388,11 @@ const DashBoard = () => {
   const fetchProfitData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `${API_URL2}/api/admin/dashboard/profit-summary?year=${year}&filter_type=${filterType}`;
+        let url = `/api/management/admin/dashboard/profit-summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -416,11 +415,11 @@ const DashBoard = () => {
   const fetchCostData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `${API_URL2}/api/admin/dashboard/cost-summary?year=${year}&filter_type=${filterType}`;
+        let url = `/api/management/admin/dashboard/cost-summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -444,11 +443,11 @@ const DashBoard = () => {
   const fetchSummaryData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `${API_URL2}/api/admin/dashboard/summary?year=${year}&filter_type=${filterType}`;
+        let url = `/api/management/admin/dashboard/summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
-        const response = await fetch(url, {
+        let response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
