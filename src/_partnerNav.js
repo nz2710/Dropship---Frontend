@@ -2,8 +2,7 @@
 import React from 'react'
 import CIcon from '@coreui/icons-react'
 import {
-//   cilSettings,
-  // cilClipboard,
+  cilClipboard,
   cilCart,
   cilHome,
   cilChart
@@ -11,12 +10,12 @@ import {
 import { CNavItem } from '@coreui/react'
 
 const _partnerNav = [
-  // {
-  //   component: CNavItem,
-  //   name: 'Dashboard',
-  //   to: '/partner/dashboard',
-  //   icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />
-  // },
+  {
+    component: CNavItem,
+    name: 'Dashboard',
+    to: '/partner/dashboard',
+    icon: <CIcon icon={cilClipboard} customClassName="nav-icon" />
+  },
   {
     component: CNavItem,
     name: 'Orders',

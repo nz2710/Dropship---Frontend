@@ -25,7 +25,7 @@ const Logindiv = () => {
       setErrosMess("Please enter username and password");
       return;
     }
-    let response = await fetch(`/api/user/login`, {
+    let response = await fetch(`${API_URL}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +45,7 @@ const Logindiv = () => {
       let redirectPath = "/admin/dashboard"; // Đường dẫn mặc định cho admin
   
       if (userRoles.some((role) => role.name === "partner")) {
-        redirectPath = "/partner/orders"; // Đường dẫn cho partner
+        redirectPath = "/partner/dashboard"; // Đường dẫn cho partner
       }
   
       navigate(redirectPath);
