@@ -2,6 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../utils/constant"
 
 
 const Logindiv = () => {
@@ -25,7 +26,7 @@ const Logindiv = () => {
       setErrosMess("Please enter username and password");
       return;
     }
-    let response = await fetch(`/api/user/login`, {
+    let response = await fetch(`${API_URL}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

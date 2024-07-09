@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import Select from 'react-select';
+import { API_URL, API_URL2 } from "../../../utils/constant"
 
 const AddUserForm = ({ onClose, onUserAdded }) => {
   const [cookies] = useCookies(["token"]);
@@ -16,7 +17,7 @@ const AddUserForm = ({ onClose, onUserAdded }) => {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        let response = await fetch(`/api/management/admin/getPartner`, {
+        let response = await fetch(`${API_URL2}/api/admin/getPartner`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -48,7 +49,7 @@ const AddUserForm = ({ onClose, onUserAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let response = await fetch(`/api/user/admin/create`, {
+      let response = await fetch(`${API_URL}/api/admin/create`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${cookies.token}`,

@@ -4,10 +4,11 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { formatNumber } from "../../utils/commonUtils";
 import { Building2, Truck, Users, Package, ShoppingCart } from "lucide-react";
-// import MiniLineChart from "../../components/admin/chart/MiniLineChart";
 import AreaChart from "../../components/admin/chart/AreaChart";
 import CustomPieChart from "../../components/admin/chart/PieChart";
 import CustomLineChart from "../../components/admin/chart/LineChart";
+import { API_URL2 } from "../../utils/constant"
+
 
 const DashBoard = () => {
   const [cookies] = useCookies(["token"]);
@@ -63,7 +64,7 @@ const DashBoard = () => {
   const fetchOrderStatusData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/order-status?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/order-status?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -101,7 +102,7 @@ const DashBoard = () => {
   const fetchTransportCostData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/transport-cost?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/transport-cost?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -141,7 +142,7 @@ const DashBoard = () => {
   const fetchAverageStats = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/average?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/average?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -176,7 +177,7 @@ const DashBoard = () => {
   const fetchTransportationMetrics = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/metric?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/metric?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -247,7 +248,7 @@ const DashBoard = () => {
   const fetchTopPartner = useCallback(
     async (year, filterType, month, metric_type_partner) => {
       try {
-        let url = `/api/management/admin/dashboard/top-partners?year=${year}&filter_type=${filterType}&metric_type=${metric_type_partner}`;
+        let url = `${API_URL2}/api/admin/dashboard/top-partners?year=${year}&filter_type=${filterType}&metric_type=${metric_type_partner}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -274,7 +275,7 @@ const DashBoard = () => {
   const fetchTopProduct = useCallback(
     async (year, filterType, month, metric_type_product) => {
       try {
-        let url = `/api/management/admin/dashboard/top-products?year=${year}&filter_type=${filterType}&metric_type=${metric_type_product}`;
+        let url = `${API_URL2}/api/admin/dashboard/top-products?year=${year}&filter_type=${filterType}&metric_type=${metric_type_product}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -334,7 +335,7 @@ const DashBoard = () => {
   const fetchRevenueData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/revenue-summary?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/revenue-summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -361,7 +362,7 @@ const DashBoard = () => {
   const fetchItemsSoldData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/itemsold-summary?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/itemsold-summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -388,7 +389,7 @@ const DashBoard = () => {
   const fetchProfitData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/profit-summary?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/profit-summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -415,7 +416,7 @@ const DashBoard = () => {
   const fetchCostData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/cost-summary?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/cost-summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -443,7 +444,7 @@ const DashBoard = () => {
   const fetchSummaryData = useCallback(
     async (year, filterType, month) => {
       try {
-        let url = `/api/management/admin/dashboard/summary?year=${year}&filter_type=${filterType}`;
+        let url = `${API_URL2}/api/admin/dashboard/summary?year=${year}&filter_type=${filterType}`;
         if (filterType === "month" && month) {
           url += `&month=${month}`;
         }
@@ -490,7 +491,7 @@ const DashBoard = () => {
   }, [filterType, fetchData, activeTab, selectedYear, selectedMonth]);
   // Tương tự cho các loại đơn hàng khác
   const handleLoadData = useCallback(async () => {
-    let url = `/api/management/admin/dashboard/total-all`;
+    let url = `${API_URL2}/api/admin/dashboard/total-all`;
 
     let response = await fetch(url, {
       method: "GET",

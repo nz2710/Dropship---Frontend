@@ -3,6 +3,7 @@ import { useParams, useLocation } from "react-router-dom";
 import goongjs from "@goongmaps/goong-js";
 import polyline from "@mapbox/polyline";
 import { formatNumber } from "../../utils/commonUtils";
+import { API_URL2 } from "../../utils/constant"
 
 function Route() {
   const [route, setRoute] = useState(null);
@@ -17,7 +18,7 @@ function Route() {
 
   const fetchRouteDetails = useCallback(async () => {
     try {
-      let response = await fetch(`/api/management/admin/route/${id}`, {
+      let response = await fetch(`${API_URL2}/api/admin/route/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

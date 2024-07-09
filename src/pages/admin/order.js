@@ -12,6 +12,8 @@ import {
   formatNumber,
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL2 } from "../../utils/constant"
+
 
 function OrderPage() {
   const [orderBy, setOrderBy] = useState("id");
@@ -55,7 +57,7 @@ function OrderPage() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/order`;
+        let url = `${API_URL2}/api/admin/order`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -100,7 +102,7 @@ function OrderPage() {
   const handleConfirmOrder = async (orderId) => {
     try {
       let response = await fetch(
-        `/api/management/admin/order/${orderId}/confirm`,
+        `${API_URL2}/api/admin/order/${orderId}/confirm`,
         {
           method: "POST",
           headers: {
@@ -126,7 +128,7 @@ function OrderPage() {
   const handleCancelOrder = async (orderId) => {
     try {
       let response = await fetch(
-        `/api/management/admin/order/${orderId}/cancel`,
+        `${API_URL2}/api/admin/order/${orderId}/cancel`,
         {
           method: "POST",
           headers: {
@@ -152,7 +154,7 @@ function OrderPage() {
   const handleShowDetail = async (item) => {
     try {
       let response = await fetch(
-        `/api/management/admin/order/${item.id}?page=1&pageSize=5`,
+        `${API_URL2}/api/admin/order/${item.id}?page=1&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -182,7 +184,7 @@ function OrderPage() {
     const currentPage = selectedPage.selected + 1;
     try {
       let response = await fetch(
-        `/api/management/admin/order/${selectedOrder.id}?page=${currentPage}&pageSize=5`,
+        `${API_URL2}/api/admin/order/${selectedOrder.id}?page=${currentPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -214,7 +216,7 @@ function OrderPage() {
     async (orderId) => {
       try {
         let response = await fetch(
-          `/api/management/admin/order/${orderId}?page=1&pageSize=5`,
+          `${API_URL2}/api/admin/order/${orderId}?page=1&pageSize=5`,
           {
             method: "GET",
             headers: {
@@ -260,7 +262,7 @@ function OrderPage() {
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
-        let response = await fetch(`/api/management/admin/getProduct`, {
+        let response = await fetch(`${API_URL2}/api/admin/getProduct`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -429,7 +431,7 @@ function OrderPage() {
             <button
               onClick={() =>
                 handleDelete(
-                  `/api/management/admin/order`,
+                  `${API_URL2}/api/admin/order`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

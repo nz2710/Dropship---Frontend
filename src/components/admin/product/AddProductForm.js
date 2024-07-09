@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import { API_URL2 } from "../../../utils/constant"
 
 function AddProductForm({ onClose, onProductAdded }) {
   const [name, setName] = useState("");
@@ -22,7 +23,7 @@ function AddProductForm({ onClose, onProductAdded }) {
       formData.append("quantity", quantity);
       formData.append("image", image || "");
 
-      let response = await fetch(`/api/management/admin/product`, {
+      let response = await fetch(`${API_URL2}/api/admin/product`, {
         method: "POST",
         headers: {
           Accept: "application/json",

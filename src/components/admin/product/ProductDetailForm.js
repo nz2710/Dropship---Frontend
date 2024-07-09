@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import { formatNumber } from "../../../utils/commonUtils";
+import { API_URL2 } from "../../../utils/constant"
 
 function ProductDetailForm({ product, onClose, onProductUpdated }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -36,7 +37,7 @@ function ProductDetailForm({ product, onClose, onProductUpdated }) {
       }
 
       let response = await fetch(
-        `/api/management/admin/product/${product.id}`,
+        `${API_URL2}/api/admin/product/${product.id}`,
         {
           method: "POST",
           headers: {

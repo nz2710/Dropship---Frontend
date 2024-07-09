@@ -4,6 +4,7 @@ import { formatNumber } from "../../../utils/commonUtils";
 import { useTableDragScroll } from "../../../hooks/useTableDragScroll";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import { API_URL2 } from "../../../utils/constant"
 import Select from "react-select";
 
 function OrderDetailForm({
@@ -99,7 +100,7 @@ function OrderDetailForm({
       };
 
       let response = await fetch(
-        `/api/management/partner/orders/${order.id}`,
+        `${API_URL2}/api/partner/orders/${order.id}`,
         {
           method: "PUT",
           headers: {

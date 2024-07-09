@@ -12,6 +12,7 @@ import {
   formatNumber,
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL2 } from "../../utils/constant"
 
 function Product() {
   const [orderBy, setOrderBy] = useState("id");
@@ -39,7 +40,7 @@ function Product() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/product`;
+        let url = `${API_URL2}/api/admin/product`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -91,7 +92,7 @@ function Product() {
 
   const handleShowDetail = async (item) => {
     try {
-      let response = await fetch(`/api/management/admin/product/${item.id}`, {
+      let response = await fetch(`${API_URL2}/api/admin/product/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +121,7 @@ function Product() {
   const handleProductUpdated = async (updatedProduct) => {
     try {
       let response = await fetch(
-        `/api/management/admin/product/${updatedProduct.id}`,
+        `${API_URL2}/api/admin/product/${updatedProduct.id}`,
         {
           method: "GET",
           headers: {
@@ -238,7 +239,7 @@ function Product() {
             <button
               onClick={() =>
                 handleDelete(
-                  `/api/management/admin/product`,
+                  `${API_URL2}/api/admin/product`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

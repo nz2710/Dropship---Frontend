@@ -16,7 +16,7 @@ import {
   cilUser,
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
-
+import { API_URL } from "../../utils/constant"
 import avatar8 from './../../assets/images/avatars/8.jpg'
 
 const AppHeaderDropdown = () => {
@@ -25,7 +25,7 @@ const AppHeaderDropdown = () => {
 
   const logout = async () => {
     try {
-      let response = await fetch(`/api/user/logout`, {
+      let response = await fetch(`${API_URL}/api/logout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${cookies.token}`,

@@ -11,6 +11,8 @@ import {
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
 import AddMilestoneForm from "../../components/admin/commission/AddMilestoneForm";
+import { API_URL2 } from "../../utils/constant"
+
 
 function CommissionRules() {
   const [orderBy, setOrderBy] = useState("revenue_milestone");
@@ -35,7 +37,7 @@ function CommissionRules() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/rule`;
+        let url = `${API_URL2}/api/admin/rule`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -126,7 +128,7 @@ function CommissionRules() {
 
   const handleSaveEdit = async () => {
     try {
-      let response = await fetch(`/api/management/admin/rule/${editingId}`, {
+      let response = await fetch(`${API_URL2}/api/admin/rule/${editingId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -243,7 +245,7 @@ function CommissionRules() {
                 <button
                   onClick={() =>
                     handleDelete(
-                      `/api/management/admin/rule`,
+                      `${API_URL2}/api/admin/rule`,
                       item.id,
                       cookies.token,
                       () => handleLoadData(currentPage)

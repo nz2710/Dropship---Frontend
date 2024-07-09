@@ -5,6 +5,7 @@ import { useTableDragScroll } from "../../../hooks/useTableDragScroll";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import { API_URL2 } from "../../../utils/constant"
 
 function OrderDetailForm({
   order,
@@ -98,7 +99,7 @@ function OrderDetailForm({
         })),
       };
 
-      let response = await fetch(`/api/management/admin/order/${order.id}`, {
+      let response = await fetch(`${API_URL2}/api/admin/order/${order.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

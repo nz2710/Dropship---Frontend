@@ -12,6 +12,7 @@ import {
   formatNumber,
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL2 } from "../../utils/constant"
 
 function Plan() {
   const [orderBy, setOrderBy] = useState("id");
@@ -45,7 +46,7 @@ function Plan() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/routing`;
+        let url = `${API_URL2}/api/admin/routing`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -94,7 +95,7 @@ function Plan() {
   const handleShowDetail = async (item) => {
     try {
       let response = await fetch(
-        `/api/management/admin/routing/${item.id}?page=1&pageSize=10`,
+        `${API_URL2}/api/admin/routing/${item.id}?page=1&pageSize=10`,
         {
           method: "GET",
           headers: {
@@ -123,7 +124,7 @@ function Plan() {
     if (window.confirm("Are you sure you want to confirm this plan?")) {
       try {
         let response = await fetch(
-          `/api/management/admin/plans/${planId}/confirm`,
+          `${API_URL2}/api/admin/plans/${planId}/confirm`,
           {
             method: "PUT",
             headers: {
@@ -150,7 +151,7 @@ function Plan() {
   const handleCompletePlan = async (planId) => {
     try {
       let response = await fetch(
-        `/api/management/admin/plans/${planId}/routes`,
+        `${API_URL2}/api/admin/plans/${planId}/routes`,
         {
           method: "GET",
           headers: {
@@ -176,7 +177,7 @@ function Plan() {
   const handleCompleteConfirm = async () => {
     try {
       let response = await fetch(
-        `/api/management/admin/plans/${selectedPlanForCompletion.plan_id}/complete`,
+        `${API_URL2}/api/admin/plans/${selectedPlanForCompletion.plan_id}/complete`,
         {
           method: "PUT",
           headers: {
@@ -228,7 +229,7 @@ function Plan() {
     const currentPage = selectedPage.selected + 1;
     try {
       let response = await fetch(
-        `/api/management/admin/routing/${selectedPlan.id}?page=${currentPage}&pageSize=10`,
+        `${API_URL2}/api/admin/routing/${selectedPlan.id}?page=${currentPage}&pageSize=10`,
         {
           method: "GET",
           headers: {
@@ -383,7 +384,7 @@ function Plan() {
             <button
               onClick={() =>
                 handleDelete(
-                  `/api/management/admin/routing`,
+                  `${API_URL2}/api/admin/routing`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

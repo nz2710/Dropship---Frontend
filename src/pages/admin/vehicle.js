@@ -12,6 +12,7 @@ import {
   formatNumber,
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL2 } from "../../utils/constant"
 
 function Vehicle() {
   const [orderBy, setOrderBy] = useState("id");
@@ -39,7 +40,7 @@ function Vehicle() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/vehicle`;
+        let url = `${API_URL2}/api/admin/vehicle`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -92,7 +93,7 @@ function Vehicle() {
 
   const handleShowDetail = async (item) => {
     try {
-      let response = await fetch(`/api/management/admin/vehicle/${item.id}`, {
+      let response = await fetch(`${API_URL2}/api/admin/vehicle/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -121,7 +122,7 @@ function Vehicle() {
   const handleVehicleUpdated = async (updatedVehicle) => {
     try {
       let response = await fetch(
-        `/api/management/admin/vehicle/${updatedVehicle.id}`,
+        `${API_URL2}/api/admin/vehicle/${updatedVehicle.id}`,
         {
           method: "GET",
           headers: {
@@ -231,7 +232,7 @@ function Vehicle() {
             <button
               onClick={() =>
                 handleDelete(
-                  `/api/management/admin/vehicle`,
+                  `${API_URL2}/api/admin/vehicle`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

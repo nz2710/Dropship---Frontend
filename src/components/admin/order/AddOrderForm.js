@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import Select from "react-select";
+import { API_URL2 } from "../../../utils/constant"
 
 function AddOrderForm({ onClose, onOrderAdded }) {
   const [partners, setPartners] = useState([]);
@@ -40,7 +41,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        let response = await fetch(`/api/management/admin/getProduct`, {
+        let response = await fetch(`${API_URL2}/api/admin/getProduct`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -63,7 +64,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   useEffect(() => {
     const fetchPartners = async () => {
       try {
-        let response = await fetch(`/api/management/admin/getPartner`, {
+        let response = await fetch(`${API_URL2}/api/admin/getPartner`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -154,7 +155,7 @@ function AddOrderForm({ onClose, onOrderAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let response = await fetch(`/api/management/admin/order`, {
+      let response = await fetch(`${API_URL2}/api/admin/order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

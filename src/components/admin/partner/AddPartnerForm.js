@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import { API_URL2 } from "../../../utils/constant"
 
 function AddPartnerForm({ onClose, onPartnerAdded }) {
   const [name, setName] = useState("");
@@ -14,7 +15,7 @@ function AddPartnerForm({ onClose, onPartnerAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let response = await fetch(`/api/management/admin/partner`, {
+      let response = await fetch(`${API_URL2}/api/admin/partner`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

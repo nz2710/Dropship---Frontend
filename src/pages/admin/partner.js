@@ -12,6 +12,8 @@ import {
   formatNumber,
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL2 } from "../../utils/constant"
+
 
 function PartnerPage() {
   const [orderBy, setOrderBy] = useState("id");
@@ -42,7 +44,7 @@ function PartnerPage() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/partner`;
+        let url = `${API_URL2}/api/admin/partner`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -99,7 +101,7 @@ function PartnerPage() {
   const handleShowDetail = async (item) => {
     try {
       let response = await fetch(
-        `/api/management/admin/partner/${item.id}?page=1&pageSize=5`,
+        `${API_URL2}/api/admin/partner/${item.id}?page=1&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -129,7 +131,7 @@ function PartnerPage() {
     const currentPage = selectedPage.selected + 1;
     try {
       let response = await fetch(
-        `/api/management/admin/partner/${selectedPartner.id}?page=${currentPage}&pageSize=5`,
+        `${API_URL2}/api/admin/partner/${selectedPartner.id}?page=${currentPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -161,7 +163,7 @@ function PartnerPage() {
     try {
       setSelectedPartner(updatedPartner);
       let response = await fetch(
-        `/api/management/admin/partner/${updatedPartner.id}?page=${currentOrderPage}&pageSize=5`,
+        `${API_URL2}/api/admin/partner/${updatedPartner.id}?page=${currentOrderPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -284,7 +286,7 @@ function PartnerPage() {
             <button
               onClick={() =>
                 handleDelete(
-                  `/api/management/admin/partner`,
+                  `${API_URL2}/api/admin/partner`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)

@@ -4,6 +4,7 @@ import ReactPaginate from "react-paginate";
 import { toast } from "react-toastify";
 import { formatNumber } from '../../../utils/commonUtils';
 import { useTableDragScroll } from '../../../hooks/useTableDragScroll';
+import { API_URL2 } from "../../../utils/constant"
 
 function PartnerDetailForm({
   partner,
@@ -31,7 +32,7 @@ function PartnerDetailForm({
   const handleSave = async () => {
     try {
       let response = await fetch(
-        `/api/management/admin/partner/${partner.id}`,
+        `${API_URL2}/api/admin/partner/${partner.id}`,
         {
           method: "PUT",
           headers: {

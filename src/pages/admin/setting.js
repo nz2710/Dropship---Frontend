@@ -7,6 +7,7 @@ import { getSortIcon, handleSort, formatNumber } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { API_URL2 } from "../../utils/constant"
 
 const steps = [
   "Select Depots",
@@ -52,7 +53,7 @@ function Settings() {
   const fetchDepots = useCallback(
     async (page = 1) => {
       try {
-        let url = `/api/management/admin/depot`;
+        let url = `${API_URL2}/api/admin/depot`;
         let params = new URLSearchParams();
         params.append("pageSize", 10);
         params.append("order_by", orderBy);
@@ -87,7 +88,7 @@ function Settings() {
   const fetchVehicles = useCallback(
     async (page = 1) => {
       try {
-        let url = `/api/management/admin/vehicle`;
+        let url = `${API_URL2}/api/admin/vehicle`;
         let params = new URLSearchParams();
         params.append("pageSize", 10);
         params.append("order_by", orderBy);
@@ -122,7 +123,7 @@ function Settings() {
   const fetchOrders = useCallback(
     async (page = 1) => {
       try {
-        let url = `/api/management/admin/order`;
+        let url = `${API_URL2}/api/admin/order`;
         let params = new URLSearchParams();
         params.append("pageSize", 10);
         params.append("order_by", orderBy);
@@ -180,7 +181,7 @@ function Settings() {
       }
 
       let response = await fetch(
-        `/api/management/admin/routing/generateFile`,
+        `${API_URL2}/api/admin/routing/generateFile`,
         {
           method: "POST",
           headers: {

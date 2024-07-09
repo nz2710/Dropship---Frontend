@@ -7,6 +7,7 @@ import AddOrderForm from "../../components/partner/order/AddOrderForm";
 import OrderDetailForm from "../../components/partner/order/OrderDetailForm";
 import { getSortIcon, handleSort, formatNumber } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL2 } from "../../utils/constant"
 
 function OrderPage() {
   const [orderBy, setOrderBy] = useState("id");
@@ -50,7 +51,7 @@ function OrderPage() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/partner/orders`;
+        let url = `${API_URL2}/api/partner/orders`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -97,7 +98,7 @@ function OrderPage() {
   const handleCancelOrder = async (orderId) => {
     try {
       let response = await fetch(
-        `/api/management/partner/orders/${orderId}/cancel`,
+        `${API_URL2}/api/partner/orders/${orderId}/cancel`,
         {
           method: "POST",
           headers: {
@@ -123,7 +124,7 @@ function OrderPage() {
   const handleShowDetail = async (item) => {
     try {
       let response = await fetch(
-        `/api/management/partner/orders/${item.id}?page=1&pageSize=5`,
+        `${API_URL2}/api/partner/orders/${item.id}?page=1&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -153,7 +154,7 @@ function OrderPage() {
     const currentPage = selectedPage.selected + 1;
     try {
       let response = await fetch(
-        `/api/management/partner/orders/${selectedOrder.id}?page=${currentPage}&pageSize=5`,
+        `${API_URL2}/api/partner/orders/${selectedOrder.id}?page=${currentPage}&pageSize=5`,
         {
           method: "GET",
           headers: {
@@ -185,7 +186,7 @@ function OrderPage() {
     async (orderId) => {
       try {
         let response = await fetch(
-          `/api/management/partner/orders/${orderId}?page=1&pageSize=5`,
+          `${API_URL2}/api/partner/orders/${orderId}?page=1&pageSize=5`,
           {
             method: "GET",
             headers: {
@@ -231,7 +232,7 @@ function OrderPage() {
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
-        let response = await fetch(`/api/management/partner/getProducts`, {
+        let response = await fetch(`${API_URL2}/api/partner/getProducts`, {
           method: "GET",
           headers: {
             Accept: "application/json",

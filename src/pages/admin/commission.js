@@ -8,6 +8,7 @@ import { useTableDragScroll } from "../../hooks/useTableDragScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import CommissionDetailForm from "../../components/admin/commission/CommissionDetailForm";
+import { API_URL2 } from "../../utils/constant"
 
 function MonthlyCommissionStats() {
   const [cookies] = useCookies(["token"]);
@@ -34,7 +35,7 @@ function MonthlyCommissionStats() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/commission`;
+        let url = `${API_URL2}/api/admin/commission`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -108,7 +109,7 @@ function MonthlyCommissionStats() {
   const handleUpdateStats = async () => {
     try {
       let response = await fetch(
-        `/api/management/admin/commission/update-monthly-stats`,
+        `${API_URL2}/api/admin/commission/update-monthly-stats`,
         {
           method: "POST",
           headers: {
@@ -132,7 +133,7 @@ function MonthlyCommissionStats() {
 
   const handleShowDetail = async (item) => {
     try {
-      let url = `/api/management/admin/commission/${item.partner_id}`;
+      let url = `${API_URL2}/api/admin/commission/${item.partner_id}`;
       let params = new URLSearchParams();
       params.append("page", 1);
       params.append("pageSize", 5);
@@ -172,7 +173,7 @@ function MonthlyCommissionStats() {
   const handleOrderPageChange = async (selectedPage) => {
     const currentPage = selectedPage.selected + 1;
     try {
-      let url = `/api/management/admin/commission/${selectedCommission.partner_id}`
+      let url = `${API_URL2}/api/admin/commission/${selectedCommission.partner_id}`
       let params = new URLSearchParams();
       params.append("page", currentPage);
       params.append("pageSize", 5);

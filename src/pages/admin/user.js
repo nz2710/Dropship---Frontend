@@ -10,6 +10,7 @@ import {
   handleDelete,
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL } from "../../utils/constant"
 
 const User = () => {
   const [cookies] = useCookies(["token"]);
@@ -37,7 +38,7 @@ const User = () => {
 
   const handleLoadData = useCallback(async () => {
     try {
-      let url = `/api/user/admin/users`;
+      let url = `${API_URL}/api/admin/users`;
       let params = new URLSearchParams();
       params.append("pageSize", dataPerPage);
       params.append("page", currentPage);
@@ -84,7 +85,7 @@ const User = () => {
 
   const handleBan = async (item) => {
     try {
-      let response = await fetch(`/api/user/admin/ban/user/${item.id}`, {
+      let response = await fetch(`${API_URL}/api/admin/ban/user/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +106,7 @@ const User = () => {
 
   const handleUnBan = async (item) => {
     try {
-      let response = await fetch(`/api/user/admin/unban/user/${item.id}`, {
+      let response = await fetch(`${API_URL}/api/admin/unban/user/${item.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -213,7 +214,7 @@ const User = () => {
             <button
               onClick={() =>
                 handleDelete(
-                  `/api/user/admin/user`,
+                  `${API_URL}/api/admin/user`,
                   item.id,
                   cookies.token,
                   handleLoadData

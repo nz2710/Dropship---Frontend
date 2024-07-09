@@ -7,6 +7,7 @@ import { getSortIcon, handleSort, formatNumber } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { API_URL2 } from "../../utils/constant"
 
 function PartnerCommissionStats() {
   const [orderBy, setOrderBy] = useState("stat_date");
@@ -32,7 +33,7 @@ function PartnerCommissionStats() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/partner/stats?year=${selectedYear}&filter_type=${filterType}&order_by=${orderBy}&sort_by=${sortBy}&page=${page}&pageSize=${pageSize}`;
+        let url = `${API_URL2}/api/partner/stats?year=${selectedYear}&filter_type=${filterType}&order_by=${orderBy}&sort_by=${sortBy}&page=${page}&pageSize=${pageSize}`;
         if (filterType === "month") {
           url += `&month=${selectedMonth}`;
         }

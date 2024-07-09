@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCookies } from "react-cookie";
 import { toast } from "react-toastify";
+import { API_URL2 } from "../../../utils/constant"
 
 function AddVehicleForm({ onClose, onVehicleAdded }) {
   const [name, setName] = useState("");
@@ -16,7 +17,7 @@ function AddVehicleForm({ onClose, onVehicleAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let response = await fetch(`/api/management/admin/vehicle`, {
+      let response = await fetch(`${API_URL2}/api/admin/vehicle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

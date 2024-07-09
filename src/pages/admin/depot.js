@@ -11,6 +11,8 @@ import {
   handleDelete,
 } from "../../utils/commonUtils";
 import { useTableDragScroll } from "../../hooks/useTableDragScroll";
+import { API_URL2 } from "../../utils/constant"
+
 
 function Depot() {
   const [cookies] = useCookies(["token"]);
@@ -38,7 +40,7 @@ function Depot() {
   const handleLoadData = useCallback(
     async (page = currentPage) => {
       try {
-        let url = `/api/management/admin/depot`;
+        let url = `${API_URL2}/api/admin/depot`;
         let params = new URLSearchParams();
         params.append("pageSize", dataPerPage);
         params.append("order_by", orderBy);
@@ -82,7 +84,7 @@ function Depot() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      let response = await fetch(`/api/management/admin/depot`, {
+      let response = await fetch(`${API_URL2}/api/admin/depot`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,7 +109,7 @@ function Depot() {
   const handleSaveDepot = async () => {
     try {
       let response = await fetch(
-        `/api/management/admin/depot/${selectedDepot.id}`,
+        `${API_URL2}/api/admin/depot/${selectedDepot.id}`,
         {
           method: "PUT",
           headers: {
@@ -232,7 +234,7 @@ function Depot() {
             <button
               onClick={() =>
                 handleDelete(
-                  `/api/management/admin/depot`,
+                  `${API_URL2}/api/admin/depot`,
                   item.id,
                   cookies.token,
                   () => handleLoadData(currentPage)
